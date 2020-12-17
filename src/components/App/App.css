@@ -1,0 +1,63 @@
+#App {
+    font-family: 'Roboto Condensed', 'Yanone Kaffeesatz', 'Arimo', 'Oswald', 'Fira Sans',  Arial, sans-serif;
+}
+
+/* body {
+    background-image: url('https://www.akveo.com/blur-admin/assets/img/blur-bg.jpg');
+} */
+
+body:before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: url(https://www.akveo.com/blur-admin/assets/img/blur-bg.jpg) no-repeat 50%;
+    background-size: cover;
+    will-change: transform;
+    z-index: -1;
+}
+
+.soma-person-block {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.soma-person-block :hover {
+    filter: 'drop-shadow(6px 2px 6px #020202)';
+    /* opacity: 0.8; */
+    /* background-color: aliceblue; */
+}
+
+.soma-person-image {
+    width: 100px;
+    margin: 5px;
+    /* display: inline-block; */
+    
+}
+
+.soma-person-image img {
+    width: 100px;
+}
+
+.soma-person-data {
+    margin: auto 0;
+    font-size: 30px;
+    margin-left: 10px;
+}
+
+.soma-person-chips {
+    /* margin-left: auto; */
+}
+
+#videoPlayer {
+    height: 100px;
+    width: 100px;
+}
+
+.cam-dashboard-box {
+    /* width: 600px; */
+    overflow: hidden;
+}

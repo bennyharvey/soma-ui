@@ -1,0 +1,10 @@
+export const BASE_URL = 'http://192.168.114.171'
+export const API_URL = BASE_URL + '/api'
+export const LOGIN_URL = API_URL + '/login'
+export const EVENTS_URL = API_URL + '/events'
+export const PHOTOS_URL = API_URL + '/photos'
+
+export const credentials = {
+    'login': '', 
+    'password': ''
+}
