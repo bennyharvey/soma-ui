@@ -11,6 +11,7 @@ import Pagination from '@material-ui/lab/Pagination'
 import PaginationItem from '@material-ui/lab/PaginationItem'
 
 import * as config from '../../components/App/config'
+import {log} from '../../components/App/config'
 
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -132,8 +133,8 @@ const API = (props) => {
         .then(res => res.json())
         .then(
             (result) => {
-                console.log('photo fetch')
-                console.log(result)
+                log('photo fetch')
+                log(result)
                 let queryToken = '&token=' + result.token
                 // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
                 let offset = '&limit=10&offset=0'
@@ -147,13 +148,13 @@ const API = (props) => {
                 .then(res => res.json())
                 .then(
                     (personsResponce) => {
-                        console.log(personsResponce)
+                        log(personsResponce)
                         // setIsLoaded(true)
                         let itemBuffer = []
                         let promises = []
                         personsResponce.forEach(person => (
                             promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
-                                // console.log(result)
+                                // log(result)
                                 if (result[0] === undefined) {
                                     return {
                                         id: '',
@@ -171,14 +172,14 @@ const API = (props) => {
                             }))
                         ))
                         Promise.all(promises).then((photos) => {
-                            console.log(itemBuffer)
+                            log(itemBuffer)
                             setPhotos(itemBuffer)
                         })
                         // setItems(personsResponce)
                         // setPageCount(10)
                     },
                     (error) => {
-                        console.log(error)
+                        log(error)
                         // setIsLoaded(true)
                         // setError(error)
                     }
@@ -188,7 +189,7 @@ const API = (props) => {
             // instead of a catch() block so that we don't swallow
             // exceptions from actual bugs in components.
             (error) => {
-                console.log(error)
+                log(error)
             }
         )
 
@@ -204,7 +205,7 @@ const API = (props) => {
         const response = await fetch(url, requestOptions);
         const jsonData = await response.json();
         // setPersonPhotos(jsonData)
-        // console.log(jsonData)
+        // log(jsonData)
         return jsonData
     }
 
@@ -251,12 +252,12 @@ const API = (props) => {
                 //         setPageCount(10)
                 //     },
                 //     (error) => {
-                //         console.log(error)
+                //         log(error)
                 //     }
                 // )
             },
             (error) => {
-                console.log(error)
+                log(error)
             }
         )
 
@@ -267,6 +268,7 @@ const API = (props) => {
     // const [events, setEvents] = useState([])
 
     const fetchEvents = async (queryToken) => {
+        log('page #: '+ page)
         let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
         // let offset = '&limit=10&offset=0'
 
@@ -283,12 +285,12 @@ const API = (props) => {
         const response = await fetch(url, requestOptions);
         const jsonData = await response.json();
         setItems(jsonData)
-        console.log('new fetch');
-        console.log(jsonData);
-        console.log(offset);
-        console.log(queryToken);
+        log('new fetch');
+        log(jsonData);
+        log(offset);
+        log(queryToken);
         // setPersonPhotos(jsonData)
-        // console.log(jsonData)
+        // log(jsonData)
         // return jsonData
     }
     
@@ -301,7 +303,7 @@ const API = (props) => {
 
     // setTimeout(() => {
     //     retrieveItems()
-    //     console.log('call init')
+    //     log('call init')
     // }, 1000)
 
     useEffect(retrieveItems, [page])
@@ -368,7 +370,7 @@ const API = (props) => {
                             const query = new URLSearchParams(location.search)
                             const page = parseInt(query.get('page') || '1', 10)
                             setPage(page)
-                            // console.log('pagination update')
+                            // log('pagination update')
                             return (
                                 <Pagination 
                                 count={10} 
@@ -460,7 +462,7 @@ const PersonBlock = (props) => {
     const dynamicPaper = clsx(classes.paper, classes.blurredBackground, classes.animatedBox, classes.zoomIn, classes.paperHover)
 
     if (props.data.type == 'face_recognize') {
-        // console.log(props)
+        // log(props)
         return (
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -475,7 +477,7 @@ const PersonBlock = (props) => {
         )
     }
     else if (props.data.type == 'person_recognize') {
-        // console.log(props)
+        // log(props)
         return (
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -555,8 +557,8 @@ const PersonData = (props) => {
 
 const RecognizedPersonImage = (props) => {
     let photoID = props.photos[props.id]
-    console.log(props);
-    console.log(photoID);
+    log(props);
+    log(photoID);
     return (
         <div className='soma-person-image'> 
             <img src={config.PHOTOS_URL + '/' + photoID + '?token=' +props.token} />
@@ -582,6 +584,7 @@ function DateAndTimePickers(props) {
       </form>
     );
 }
+
 
 export default Events
 
