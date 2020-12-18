@@ -46,6 +46,30 @@ body:before {
     margin: auto 0;
     font-size: 30px;
     margin-left: 10px;
+    width: 100%;
+    position: relative;
+}
+
+.soma-person-data-id {
+    float: right;
+    font-size: 20px;
+}
+
+.soma-person-data-dc {
+    /* margin-left: 10px; */
+    font-size: 20px;
+}
+.soma-person-data-confirm_button {
+    position: absolute !important;
+    top: 10px;
+    right: 10px;
+}
+
+.soma-person-data-not_confirmed_text {
+    color: red;
+}
+.soma-person-data-confirmed_text {
+    color: rgb(0, 241, 93);
 }
 
 .soma-person-chips {
