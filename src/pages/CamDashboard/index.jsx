@@ -18,54 +18,53 @@ const CamDashboard = () => {
     const dynamicPaper = clsx(classes.paper, classes.blurredBackground, classes.animatedBox, classes.zoomIn, classes.overflowHidden);
 
     const [items, setItems] = React.useState([
-            <div className="cam-dashboard-box" key={1}>
+            <div className="cam-dashboard-box" key={12}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='https://strm-kzn10.tattelecom.ru/hls/3ae4bb62-073b-40f4-9c00-6a0f36e4ade9/playout.m3u8'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_21/s.m3u8'
                         playing={true}
                         
                     />
                 </Paper>
             </div>,
-            <div className="cam-dashboard-box" key={2}>
+            <div className="cam-dashboard-box" key={12}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='http://ovr:ttkdomofonpp4@11.kzn.bd.tattelecom.ru/live/media/AXXON--11/DeviceIpint.465/SourceEndpoint.video:0:0?w=1920&h=0&format=mp4'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_23/s.m3u8'
+                        playing={true}
+                    />
+                </Paper>
+            </div>,
+            <div className="cam-dashboard-box" key={14}>
+                <Paper elevation={5} className={dynamicPaper}>
+                    <ReactPlayer 
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_24/s.m3u8'
                         playing={true}
                         
                     />
                 </Paper>
             </div>,
-            <div className="cam-dashboard-box" key={2}>
+            <div className="cam-dashboard-box" key={15}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='https://strm-kzn10.tattelecom.ru/hls/143edcc3-ec64-4cca-997e-0559356f7c56/playout.m3u8'
-                        playing={true}
-                    />
-                </Paper>
-            </div>,
-            <div className="cam-dashboard-box" key={4}>
-                <Paper elevation={5} className={dynamicPaper}>
-                    <ReactPlayer 
-                        url='https://strm-kzn10.tattelecom.ru/hls/084e09bf-f894-4ae1-9902-f520eb0d1c55/playout.m3u8'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_25/s.m3u8'
                         playing={true}
                         
                     />
                 </Paper>
             </div>,
-            <div className="cam-dashboard-box" key={5}>
+            <div className="cam-dashboard-box" key={16}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='https://strm-kzn10.tattelecom.ru/hls/006a0ed1-f246-4402-b480-1676d6a67f77/playout.m3u8'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_26/s.m3u8'
                         playing={true}
-                        
                     />
                 </Paper>
             </div>,
-            <div className="cam-dashboard-box" key={6}>
+            <div className="cam-dashboard-box" key={16}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='https://strm-kzn10.tattelecom.ru/hls/8d5c2068-9303-4e35-a792-e04082d5f18c/playout.m3u8'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_22/s.m3u8'
                         playing={true}
                     />
                 </Paper>

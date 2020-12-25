@@ -24,7 +24,7 @@ import * as layout from '../../components/Layout'
 
 import { Switch, Route, Link as RouterLink, useParams, useRouteMatch, useHistory } from "react-router-dom";
 
-const Persons = (props) => {
+const Users = (props) => {
     let { path, url } = useRouteMatch();
 
     return (
@@ -75,7 +75,7 @@ const API = (props) => {
                 let queryToken = '&token=' + result.token
                 let offset = page  == undefined ? '&per-page=10&page=1' : '&per-page=10&page=' + page
 
-                fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset, {
+                fetch(config.NEW_USERS_URL + '?fields=login,role' + offset, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ const API = (props) => {
                             setPhotos(itemBuffer)
                         })
                         setItems(personsResponce)
-                        setItemsArray(reindexArray(personsResponce, 'id'))
+                        setItemsArray(reindexArray(personsResponce, 'login'))
                     },
                     (error) => {
                         log(error)
@@ -208,7 +208,7 @@ const API = (props) => {
             
                 <br />
                 {items.map(item => (
-                    <div key={item.id}>
+                    <div key={item.login}>
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Paper elevation={5} className={dynamicPaper}>
@@ -236,7 +236,6 @@ const PersonDescription = (props) => {
     let history = useHistory();
     return (
         <div className='soma-person-desc'>
-            <h1>Досье №{props.data.id}</h1>
             <Button
                 variant="contained"
                 color="primary"
@@ -256,19 +255,10 @@ const PersonDescription = (props) => {
             </Button>
             <br />
             <Grid container spacing={3}>
+                
                 <Grid item xs={6}>
-                    <div className='soma-person-desc-image_block'> 
-                        <div className='soma-person-data-dc'> Фотографии: </div> <br />
-                        {props.personFaces[props.data.id].map(perconFace => (
-                            <div className='soma-person-desc-image' key={perconFace.id}> 
-                                <img src={config.PHOTOS_URL + '/' + perconFace.photo_id + '?token=' +props.token} />
-                            </div>
-                        ))}
-                    </div>
-                </Grid>
-                <Grid item xs={6}>
-                    <div className='soma-person-data-desc-text'> ФИО: {props.data.name} </div>
-                    <div className='soma-person-data-dc'> Тип досье: {props.data.position} </div>
+                    <div className='soma-person-data-desc-text'> Логин: {props.data.login} </div>
+                    <div className='soma-person-data-dc'> Роль: {props.data.role} </div>
                 </Grid>
             </Grid>
            
@@ -280,8 +270,7 @@ const PersonDescription = (props) => {
 const PersonBlock = (props) => {
     let classes = layout.makeCommonClasses();
     return (
-        <RouterLink className='soma-person-block'  key={props.id} to={'/persons/' + props.data.id}>
-            <PersonImage id={props.data.id} src={props.imageSrc} token={props.token} photos={props.photos}/>
+        <RouterLink className='soma-person-block'  key={props.id} to={'/users/' + props.data.login}>
             <PersonData data={props.data} />
         </RouterLink>
     )
@@ -302,12 +291,12 @@ const PersonImage = (props) => {
 const PersonData = (props) => {
     return (
         <div className='soma-person-data'> 
-            <div className='soma-person-data-text'> {props.data.name} </div>
-            <div className='soma-person-data-dc'> Тип досье: {props.data.position} </div>
+            <div className='soma-person-data-text'> Логин: {props.data.login} </div>
+            <div className='soma-person-data-dc'> Роль: {props.data.role} </div>
             <div className='soma-person-data-id'> #{props.data.id} </div>
 
         </div>
     )
 }
 
-export default Persons
+export default Users

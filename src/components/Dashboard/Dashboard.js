@@ -35,6 +35,8 @@ import avatarImg from "../../static/images/1.jpg";
 
 import Events from '../../pages/Events'
 import Persons from '../../pages/Persons'
+import Main from '../../pages/Main'
+import Users from '../../pages/Users'
 
 import {
     ListItemIcon,
@@ -255,12 +257,12 @@ export default function Dashboard(props) {
                     >
                     TTK SOMA UI
                     </Typography>
-                    <Switch checked={darkState} onChange={handleThemeChange} />
-                    <IconButton color="inherit" className={classes.appBarIcon}>
+                    {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
+                    {/* <IconButton color="inherit" className={classes.appBarIcon}>
                     <Badge badgeContent={4} color="secondary">
                         <NotificationsIcon />
                     </Badge>
-                    </IconButton>
+                    </IconButton> */}
                     <Avatar
                     className={classes.avatar}
                     src={avatarImg}
@@ -284,13 +286,13 @@ export default function Dashboard(props) {
                 <List>
                     <ListItem 
                     component={RouterLink}
-                    to='/'
+                    to='/users'
                     button
                     >
                         <ListItemIcon>
-                            <DashboardIcon />
+                            <ListIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Главная" />
+                        <ListItemText primary="Пользователи" />
                     </ListItem>
 
                     <ListItem 
@@ -326,7 +328,7 @@ export default function Dashboard(props) {
                         <ListItemText primary="Видеостена" />
                     </ListItem>
 
-
+                    {/* 
                     <ListItem button onClick={handleOpenSettings} disableRipple={false}>
                         <ListItemIcon>
                             <SettingsIcon />
@@ -359,7 +361,7 @@ export default function Dashboard(props) {
                                 <ListItemText inset primary="page 2" />
                             </ListItem>
                         </List>
-                    </Collapse>
+                    </Collapse> */}
                 </List>
                 <Divider />
             </Drawer>
@@ -369,15 +371,22 @@ export default function Dashboard(props) {
                 <Container maxWidth={false} className={classes.container}>
                     <RouterSwitch>
                         <Route exact path="/">
-                            main
+                            asd
                         </Route>
-                        <Route exact path="/events">
+                        <Route path="/main">
+                            {/* asd */}
+                            <Main />
+                        </Route>
+                        <Route path="/events">
                             <Events />
                         </Route>
-                        <Route exact path="/cam-dashboard">
+                        <Route path="/users">
+                            <Users />
+                        </Route>
+                        <Route path="/cam-dashboard">
                             <CamDashboard />
                         </Route>
-                        <Route exact path="/persons">
+                        <Route path="/persons">
                             <Persons page={pageParam}/>
                         </Route>
                     </RouterSwitch>

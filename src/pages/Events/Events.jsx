@@ -11,7 +11,7 @@ import Pagination from '@material-ui/lab/Pagination'
 import PaginationItem from '@material-ui/lab/PaginationItem'
 
 import * as config from '../../components/App/config'
-import {log} from '../../components/App/config'
+import {log, getDateForPicker} from '../../components/App/config'
 
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -108,12 +108,6 @@ const API = (props) => {
     const [photos, setPhotos] = useState([])
 
     // let apiUrl = API_URL
-    
-
-    let credentials = {
-        'login': 'admin', 
-        'password': 'Cuzee2motof6aiJe'
-    }
 
         
     // Getting person photos
@@ -136,10 +130,10 @@ const API = (props) => {
                 log('photo fetch')
                 log(result)
                 let queryToken = '&token=' + result.token
-                // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
-                let offset = '&limit=10&offset=0'
+                let offset = page  == undefined ? '&limit=5&offset=0' : '&limit=5&offset=' + page * 10
+                // let offset = '&page='
 
-                fetch(config.PERSONS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
+                fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -532,7 +526,7 @@ const PersonData = (props) => {
         let dossier = props.data.data.person_position
 
         return (
-            <div className='soma-person-data'> 
+        <div className='soma-person-data'> 
             <div className='soma-person-data-time'> {date}  {time} </div>
             <div className='soma-person-data-text'> {name}</div>
             <div className='soma-person-data-text'> Тип досье: {dossier} </div>
@@ -575,10 +569,10 @@ function DateAndTimePickers(props) {
           id="datetime-local"
           label={props.text}
           type="datetime-local"
-          defaultValue="2017-05-24T10:30"
+          defaultValue={getDateForPicker()}
           className={classes.textField}
           InputLabelProps={{
-            shrink: true,
+                shrink: true,
           }}
         />
       </form>

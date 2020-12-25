@@ -30,10 +30,9 @@ export const makeCommonClasses = makeStyles(theme => ({
     },
     paperHover: {
         '&:hover': { 
-            // filter: 'drop-shadow(6px 2px 6px #020202)',
-            transition: '0.6s',
-            backgroundColor:'red !important',
-            background: '',
+            filter: 'drop-shadow(6px 2px 6px #020202)',
+            filter: 'brightness(120%)',
+            // transition: '0.6s',
             // opacity: '0.6',
             cursor: 'pointer',
         },

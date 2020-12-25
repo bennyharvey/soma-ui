@@ -23,6 +23,8 @@ body:before {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    text-decoration: none;
+    color: white;
 }
 
 .soma-person-block :hover {
@@ -74,6 +76,26 @@ body:before {
 
 .soma-person-chips {
     /* margin-left: auto; */
+}
+
+.soma-person-desc-image {
+    /* float: left; */
+    display: inline-block;
+    padding: 10px;
+}
+.soma-person-desc-image img {
+    /* width: 200px; */
+    height: 300px;
+}
+.soma-person-data-desc-text {
+    font-size: 32px;
+}
+.soma-person-desc-image_block {
+    /* display: flex; */
+    background-color: #14182573;
+    padding: 10px;
+    margin-top: 20px;
+    /* width: fit-content; */
 }
 
 #videoPlayer {
