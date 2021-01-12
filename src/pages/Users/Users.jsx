@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import {AuthContext} from '../../components/App/auth'
 
 import clsx from "clsx";
 import Pagination from '@material-ui/lab/Pagination';
@@ -16,7 +17,13 @@ import * as config from '../../components/App/config'
 import { log , reindexArray} from '../../components/App/config'
 import * as layout from '../../components/Layout'
 
-
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Slide from '@material-ui/core/Slide';
 
 // import Chart from "./Chart";
 // import UserCard from "./UserCard";
@@ -51,89 +58,65 @@ const API = (props) => {
     const [page, setPage] = useState(1)
     const [photos, setPhotos] = useState([])
     const [personFaces, setPersonFaces] = useState([])
-    const [token, setToken] = useState('')
 
     let apiUrl = 'https://reqres.in/api/users?page=' + props.page
+
+    const { token } = useContext(AuthContext);
     
     const retrieveItems = () => {
-        fetch(config.LOGIN_URL, {
-            method: 'POST',
-            body: JSON.stringify(config.credentials),
-            credentials: 'include',
+        // log(result)
+        let queryToken = '&token=' + token
+        let offset = page  == undefined ? '&per-page=10&page=1' : '&per-page=10&page=' + page
+
+        fetch(config.NEW_USERS_URL + '?fields=login,role' + offset, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
             },
-            mode: 'cors',
-            cache: 'default',
         })
-        .then(res => res.json())
+        .then(res => {
+            setPageCount(parseInt(res.headers.get('X-Pagination-Page-Count')))
+            // res.headers.forEach((e) => {
+            //     log(e)
+            // })
+            // log(res.headers.keys().next())
+            return res.json()
+        })
         .then(
-            (result) => {
-                // log(result)
-                setToken(result.token)
-                let queryToken = '&token=' + result.token
-                let offset = page  == undefined ? '&per-page=10&page=1' : '&per-page=10&page=' + page
+            (personsResponce) => {
+                log(personsResponce)
+                setIsLoaded(true)
+                let itemBuffer = []
+                let personFacesBuffer = []
+                let promises = []
+                personsResponce.forEach(person => (
+                    promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
+                        // log(result)
+                        if (result[0] === undefined) {
+                            return {
+                                id: '',
+                                photo_id: '',
+                            }
+                        }
+                        else {
+                            itemBuffer[person.id] = result[0].photo_id
+                            personFacesBuffer[person.id] = result
+                            return {
+                                id: result[0].id ?? '',
+                                photo_id: result[0].photo_id ?? '',
+                            }
+                        }
 
-                fetch(config.NEW_USERS_URL + '?fields=login,role' + offset, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    }))
+                ))
+                Promise.all(promises).then((photos) => {
+                    setPersonFaces(personFacesBuffer)
+                    log(personFacesBuffer)
+                    setPhotos(itemBuffer)
                 })
-                .then(res => {
-                    setPageCount(parseInt(res.headers.get('X-Pagination-Page-Count')))
-                    // res.headers.forEach((e) => {
-                    //     log(e)
-                    // })
-                    // log(res.headers.keys().next())
-                    return res.json()
-                })
-                .then(
-                    (personsResponce) => {
-                        log(personsResponce)
-                        setIsLoaded(true)
-                        let itemBuffer = []
-                        let personFacesBuffer = []
-                        let promises = []
-                        personsResponce.forEach(person => (
-                            promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
-                                // log(result)
-                                if (result[0] === undefined) {
-                                    return {
-                                        id: '',
-                                        photo_id: '',
-                                    }
-                                }
-                                else {
-                                    itemBuffer[person.id] = result[0].photo_id
-                                    personFacesBuffer[person.id] = result
-                                    return {
-                                        id: result[0].id ?? '',
-                                        photo_id: result[0].photo_id ?? '',
-                                    }
-                                }
-
-                            }))
-                        ))
-                        Promise.all(promises).then((photos) => {
-                            setPersonFaces(personFacesBuffer)
-                            log(personFacesBuffer)
-                            setPhotos(itemBuffer)
-                        })
-                        setItems(personsResponce)
-                        setItemsArray(reindexArray(personsResponce, 'login'))
-                    },
-                    (error) => {
-                        log(error)
-                        setIsLoaded(true)
-                        setError(error)
-                    }
-                )
+                setItems(personsResponce)
+                setItemsArray(reindexArray(personsResponce, 'login'))
             },
-            // Note: it's important to handle errors here
-            // instead of a catch() block so that we don't swallow
-            // exceptions from actual bugs in components.
             (error) => {
                 log(error)
                 setIsLoaded(true)
@@ -205,19 +188,21 @@ const API = (props) => {
                     );
                 }}
             </Route>
-            
-                <br />
-                {items.map(item => (
-                    <div key={item.login}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Paper elevation={5} className={dynamicPaper}>
-                                    <PersonBlock data={item} imageSrc={item.avatar} photos={photos} token={token}/>
-                                </Paper>
-                            </Grid>
+            <br />
+            <NewUserDialog />
+            <br />
+            <br />
+            {items.map(item => (
+                <div key={item.login}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                            <Paper elevation={5} className={dynamicPaper}>
+                                <PersonBlock data={item} imageSrc={item.avatar} photos={photos} token={token}/>
+                            </Paper>
                         </Grid>
-                    </div>
-                ))}
+                    </Grid>
+                </div>
+            ))}
                 
             
         </div>
@@ -298,5 +283,83 @@ const PersonData = (props) => {
         </div>
     )
 }
+
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+function NewUserDialog() {
+    const [open, setOpen] = React.useState(false);
+  
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+  
+    return (
+      <div>
+        <Button 
+            onClick={handleClickOpen}
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={false}>
+          Добавить пользователя
+        </Button>
+        <Dialog 
+            open={open} 
+            onClose={handleClose} 
+            aria-labelledby="form-dialog-title"
+            TransitionComponent={Transition}
+            keepMounted
+            fullWidth={true}
+            maxWidth={'sm'}>
+          <DialogTitle id="form-dialog-title">Новый пользователь</DialogTitle>
+          <DialogContent>
+            {/* <DialogContentText>
+              text
+            </DialogContentText> */}
+            <TextField
+              autoFocus
+            //   margin="dense"
+              id="name"
+              label="Логин"
+            //   type="email"
+              fullWidth
+            />
+             <TextField
+              autoFocus
+            //   margin="dense"
+              id="dossier"
+              label="Пароль"
+              type="password"
+              fullWidth
+            />
+             <TextField
+              autoFocus
+            //   margin="dense"
+              id="dossier"
+              label="Повторите пароль"
+              type="password"
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Отменить
+            </Button>
+            <Button onClick={handleClose} color="primary">
+              Сохранить
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+  }
+
 
 export default Users

@@ -18,6 +18,12 @@ export const makeCommonClasses = makeStyles(theme => ({
     root: {
         display: "flex"
     },
+    loginForm: {
+        '& > *': {
+        //   margin: theme.spacing(1),
+        //   width: '25ch',
+        },
+    },
     overflowHidden:{
         overflow:'hidden !important'
     },
@@ -132,12 +138,19 @@ export const makeCommonClasses = makeStyles(theme => ({
     themeRed: {
         backgroundColor: 'red'
     },
+    loginCard: {
+        minWidth: 275,
+        width: "300px",
+        margin: "auto",
+        marginTop: "10%",
+        // backgroundColor: "#00000030",
+    },
 }))
 
 let darkState = true
 const palletType = darkState ? "dark" : "light";
 const mainPrimaryColor = darkState ? lightBlue[500] : lightBlue[500];
-const mainSecondaryColor = darkState ? lightBlue[500] : deepPurple[500];
+const mainSecondaryColor = darkState ? lightBlue[500] : lightBlue[500];
 
 export const darkTheme = createMuiTheme({
     palette: {

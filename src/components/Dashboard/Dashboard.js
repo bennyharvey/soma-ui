@@ -48,6 +48,7 @@ import {
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import PeopleIcon from "@material-ui/icons/People";
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import BarChartIcon from "@material-ui/icons/BarChart";
 import LayersIcon from "@material-ui/icons/Layers";
 import AssignmentIcon from "@material-ui/icons/Assignment";
@@ -255,7 +256,7 @@ export default function Dashboard(props) {
                     noWrap
                     className={classes.title}
                     >
-                    TTK SOMA UI
+                    Система распознавания лиц Таттелеком (Тестовая версия)
                     </Typography>
                     {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
                     {/* <IconButton color="inherit" className={classes.appBarIcon}>
@@ -290,7 +291,7 @@ export default function Dashboard(props) {
                     button
                     >
                         <ListItemIcon>
-                            <ListIcon />
+                            <AccountBoxIcon />
                         </ListItemIcon>
                         <ListItemText primary="Пользователи" />
                     </ListItem>
@@ -371,7 +372,7 @@ export default function Dashboard(props) {
                 <Container maxWidth={false} className={classes.container}>
                     <RouterSwitch>
                         <Route exact path="/">
-                            asd
+                            <Events />
                         </Route>
                         <Route path="/main">
                             {/* asd */}

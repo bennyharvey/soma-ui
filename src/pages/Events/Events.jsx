@@ -1,5 +1,7 @@
-import React, { useState, useEffect }  from "react"
+import React, { useState, useEffect, useContext }  from "react"
 import * as layout from '../../components/Layout'
+import {AuthContext} from '../../components/App/auth'
+
 import clsx from "clsx"
 import {
     Typography,
@@ -12,7 +14,7 @@ import PaginationItem from '@material-ui/lab/PaginationItem'
 
 import * as config from '../../components/App/config'
 import {log, getDateForPicker} from '../../components/App/config'
-
+import BeenhereIcon from '@material-ui/icons/Beenhere';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -27,6 +29,7 @@ import Icon from '@material-ui/core/Icon';
 import SaveIcon from '@material-ui/icons/Save';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
+
 
 // const Events = () => {
 //     const classes = layout.makeCommonClasses()
@@ -96,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
 
 
 const API = (props) => {
-    const [token, setToken] = useState('')
     const [error, setError] = useState(null)
     const [isLoaded, setIsLoaded] = useState(false)
     const [items, setItems] = useState([])
@@ -107,86 +109,61 @@ const API = (props) => {
 
     const [photos, setPhotos] = useState([])
 
-    // let apiUrl = API_URL
-
+    const { token } = useContext(AuthContext);
         
     // Getting person photos
     // =================================
     const retrievePersonPhotos = () => {
-        fetch(config.LOGIN_URL, {
-            method: 'POST',
-            body: JSON.stringify(config.credentials),
-            credentials: 'include',
+        log('photo fetch')
+        let queryToken = '&token=' + token
+        let offset = page  == undefined ? '&limit=5&offset=0' : '&limit=5&offset=' + page * 10
+        // let offset = '&page='
+
+        fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
             },
-            mode: 'cors',
-            cache: 'default',
         })
         .then(res => res.json())
         .then(
-            (result) => {
-                log('photo fetch')
-                log(result)
-                let queryToken = '&token=' + result.token
-                let offset = page  == undefined ? '&limit=5&offset=0' : '&limit=5&offset=' + page * 10
-                // let offset = '&page='
+            (personsResponce) => {
+                log(personsResponce)
+                // setIsLoaded(true)
+                let itemBuffer = []
+                let promises = []
+                personsResponce.forEach(person => (
+                    promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
+                        // log(result)
+                        if (result[0] === undefined) {
+                            return {
+                                id: '',
+                                photo_id: '',
+                            }
+                        }
+                        else {
+                            itemBuffer[person.id] = result[0].photo_id
+                            return {
+                                id: result[0].id ?? '',
+                                photo_id: result[0].photo_id ?? '',
+                            }
+                        }
 
-                fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    }))
+                ))
+                Promise.all(promises).then((photos) => {
+                    log(itemBuffer)
+                    setPhotos(itemBuffer)
                 })
-                .then(res => res.json())
-                .then(
-                    (personsResponce) => {
-                        log(personsResponce)
-                        // setIsLoaded(true)
-                        let itemBuffer = []
-                        let promises = []
-                        personsResponce.forEach(person => (
-                            promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
-                                // log(result)
-                                if (result[0] === undefined) {
-                                    return {
-                                        id: '',
-                                        photo_id: '',
-                                    }
-                                }
-                                else {
-                                    itemBuffer[person.id] = result[0].photo_id
-                                    return {
-                                        id: result[0].id ?? '',
-                                        photo_id: result[0].photo_id ?? '',
-                                    }
-                                }
-
-                            }))
-                        ))
-                        Promise.all(promises).then((photos) => {
-                            log(itemBuffer)
-                            setPhotos(itemBuffer)
-                        })
-                        // setItems(personsResponce)
-                        // setPageCount(10)
-                    },
-                    (error) => {
-                        log(error)
-                        // setIsLoaded(true)
-                        // setError(error)
-                    }
-                )
+                // setItems(personsResponce)
+                // setPageCount(10)
             },
-            // Note: it's important to handle errors here
-            // instead of a catch() block so that we don't swallow
-            // exceptions from actual bugs in components.
             (error) => {
                 log(error)
+                // setIsLoaded(true)
+                // setError(error)
             }
         )
-
     }
     const fetchPersonPhotos = async (person, queryToken) => {
         let url = config.PERSONS_URL + '/' + person.id + '/faces?' + queryToken
@@ -208,53 +185,15 @@ const API = (props) => {
     
 
     const retrieveItems = () => {
-        fetch(config.LOGIN_URL, {
-            method: 'POST',
-            body: JSON.stringify(config.credentials),
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            mode: 'cors',
-            cache: 'default',
-        })
-        .then(res => res.json())
-        .then(
-            (result) => {
-                setToken(result.token)
-                let queryToken = '&token=' + result.token
+        // setToken(result.token)
+        let queryToken = '&token=' + token
                 
-                // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
-                // let offset = '&limit=10&offset=0'
-                fetchEvents(queryToken)  
-               
-                setIsLoaded(true)
-                setPageCount(10)
-
-                // fetch(config.EVENTS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
-                //     method: 'GET',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                // })
-                // .then(res => res.json())
-                // .then(
-                //     (eventsResponce) => {
-                //         setIsLoaded(true)
-                //         setItems(eventsResponce)
-                //         setPageCount(10)
-                //     },
-                //     (error) => {
-                //         log(error)
-                //     }
-                // )
-            },
-            (error) => {
-                log(error)
-            }
-        )
-
+        // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
+        // let offset = '&limit=10&offset=0'
+        fetchEvents(queryToken)  
+       
+        setIsLoaded(true)
+        setPageCount(10)
     }
 
     
@@ -426,9 +365,8 @@ const API = (props) => {
                         input={<BootstrapInput />}
                         >
 
-                        <MenuItem value={10}>face_recognize</MenuItem>
-                        <MenuItem value={20}>person_recognize</MenuItem>
-                        <MenuItem value={30}>passage_open</MenuItem>
+                        <MenuItem value={10}>Совпадения из списка досье</MenuItem>
+                        <MenuItem value={20}>Распознования лиц</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
@@ -442,7 +380,7 @@ const API = (props) => {
            
             <br />
             {items.map(item => (
-                <PersonBlock key={item.id} data={item} imageSrc={item.avatar} token={token}/>
+                <PersonBlock key={item.id} data={item} imageSrc={item.avatar} token={token} photos={photos}/>
             ))}
         </div>
         )
@@ -471,13 +409,15 @@ const PersonBlock = (props) => {
         )
     }
     else if (props.data.type == 'person_recognize') {
-        // log(props)
+        log(props)
         return (
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <Paper elevation={5} className={dynamicPaper}>
                         <div className='soma-person-block' key={props.id}>
                             <PersonImage src={props.imageSrc} photoId={props.data.data.photo_id} token={props.token} />
+                            <PersonImage src={props.imageSrc} photoId={props.photos[props.data.data.person_id]} token={props.token} />
+                            
                             {/* <RecognizedPersonImage src={props.imageSrc} photoId={props.data.data.photo_id} token={props.token} /> */}
                             <PersonData data={props.data} />
                         </div>
@@ -509,6 +449,16 @@ const PersonData = (props) => {
     let detectConfidence = (props.data.data.detect_confidence).toFixed(2) * 100
     if (detectConfidence > 100) detectConfidence = detectConfidence - (detectConfidence - 100) //lol
 
+    const [confirmed, setConfirmed] = useState(false)
+    const [cbColor, setcbColor] = useState("primary")
+    const [cbIcon, setcbIcon] = useState(<SaveIcon />)
+    const [cbText, setcbText] = useState("Подтвердить")
+
+
+    // const [playButtonIcon, setPlayButtonIcon] = React.useState(<PlayArrow />);
+    // const [playButtonText, setPlayButtonText] = React.useState('Старт');
+    // const [playButtonColor, setPlayButtonColor] = React.useState('primary');
+    // const [intervalID, setIntervalID] = React.useState(0);
 
     if (props.data.type == 'face_recognize') {
         return (
@@ -525,22 +475,30 @@ const PersonData = (props) => {
         let name = props.data.data.person_name
         let dossier = props.data.data.person_position
 
+
         return (
         <div className='soma-person-data'> 
             <div className='soma-person-data-time'> {date}  {time} </div>
             <div className='soma-person-data-text'> {name}</div>
             <div className='soma-person-data-text'> Тип досье: {dossier} </div>
-            <div className='soma-person-data-dc'>Уверенность распознавания: {detectConfidence}% </div>
             <div className='soma-person-data-dc'>Точность совпадения: {descriptorsDistance}% </div>
-            <div className='soma-person-data-dc'>Статус: <span className='soma-person-data-not_confirmed_text'> не подтверждено </span> </div>
+            <div className='soma-person-data-dc'>Уверенность распознавания: {detectConfidence}% </div>
+            {/* <div className='soma-person-data-dc'>Статус: <span className='soma-person-data-not_confirmed_text'> не подтверждено </span> </div> */}
             <Button
                 variant="contained"
-                color="primary"
+                color={cbColor}
                 size="large"
                 className='soma-person-data-confirm_button'
-                startIcon={<SaveIcon />}
+                startIcon={cbIcon}
+                onClick={() => { 
+                    if (!confirmed) {
+                        setcbIcon(<BeenhereIcon />)
+                        setcbColor('default')
+                        setcbText('Подтверждено')
+                    } 
+                }}
             >
-                Подтвердить
+                {cbText}
             </Button>
             <div className='soma-person-data-id'> #{props.data.id} </div>
         </div>
