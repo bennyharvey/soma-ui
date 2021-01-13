@@ -32,6 +32,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 import { Switch, Route, Link as RouterLink, useParams, useRouteMatch, useHistory } from "react-router-dom";
 
+import Alert from '@material-ui/lab/Alert';
+import Collapse from '@material-ui/core/Collapse';
+
 const Persons = (props) => {
     let { path, url } = useRouteMatch();
 
@@ -182,23 +185,79 @@ const API = (props) => {
 }
 
 
+const TAlert = (props) => {
+    // if (props.visible) {
+        return (
+            <Collapse in={props.visible} className="p13-alert">
+                <Alert 
+                variant="outlined" 
+                severity="success"
+                // onClose={() => {setVisibility(false)}}
+                >
+                    {props.text}
+                    {/* Изменения сохранены успешно */}
+                </Alert>
+            </Collapse>
+        )
+    // }
+    // return null
+}
+
 const PersonDescription = (props) => {
+    const [alertVisible, setAlertVisibility] = useState(false) 
+    const [alertText, setAlertText] = useState('')
     let history = useHistory();
     const classes = layout.makeCommonClasses()
+    const [image, setImage] = useState(null)
     const { token } = useContext(AuthContext);
     const handlePhotoDelete = (id) => {
         PersonsAPI.deletePhoto(id, token).then(res => {
             if (res.status == 200) {
                 props.updateCallback()
-                history.push("/persons")
+                setAlertText("Фото удалено")
+                setAlertVisibility(true)
+                setTimeout(() => {setAlertVisibility(false)}, 5000);
+                // history.push("/persons")
             }
         })
     }
+    
     log('desc')
     log(props)
+    const onImageChange = e => {
+        if (e.target.files && e.target.files[0]) {
+            let img = e.target.files[0];
+            setImage(URL.createObjectURL(img))
+            PersonsAPI.addPersonPhoto(props.data.id, e.target.files[0], token).then(res => {
+                if (res.status == 200) {
+                    props.updateCallback()
+                    setAlertText("Фото добавлено")
+                    setAlertVisibility(true)
+                    setTimeout(() => {setAlertVisibility(false)}, 5000);
+                }
+            })
+            
+        }
+    }
+
+    const hiddenFileInput = React.useRef(null);
+
+    const handlePhotoUploadButton = event => {
+        hiddenFileInput.current.click();
+    };
+    const handlePersonEdit = () => {
+        setAlertText("Изменения сохранены")
+        setAlertVisibility(true)
+        setTimeout(() => {setAlertVisibility(false)}, 5000);
+        props.updateCallback()
+    }
+
+    let faces = props.personFaces[props.data.id]
+    
     return (
         <div className='soma-person-desc'>
             <h1>Досье №{props.data.id}</h1>
+          
             <Button
                 variant="contained"
                 color="primary"
@@ -210,11 +269,26 @@ const PersonDescription = (props) => {
             >
                 {'< Назад'}
             </Button>
+            <TAlert visible={alertVisible} text={alertText} />
+            <Button 
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handlePhotoUploadButton}>
+                Добавить фото
+            </Button>
+            <input 
+                type="file" 
+                name="personPhoto" 
+                onChange={onImageChange}
+                ref={hiddenFileInput}
+                style={{display:'none'}} 
+            />
             <Grid container spacing={3}>
                 <Grid item xs={6}>
                     <div className='soma-person-desc-image_block'> 
                         <div className='soma-person-data-dc'> Фотографии: </div> <br />
-                        {props.personFaces[props.data.id].map(perconFace => (
+                        {faces.map(perconFace => (
                             <div className='soma-person-desc-image' key={perconFace.id}> 
                                 <img src={config.PHOTOS_URL + '/' + perconFace.photo_id + '?token=' +props.token} />
                                 <IconButton aria-label="delete" className={classes.personPhotoDeleteButton}
@@ -228,7 +302,7 @@ const PersonDescription = (props) => {
                     </div>
                 </Grid>
                 <Grid item xs={6}>
-                    <EditDossierDialog data={props.data}/> <br />
+                    <EditDossierDialog data={props.data} token={token} updateCallback={handlePersonEdit}/> <br />
                     <div className='soma-person-data-desc-text'> ФИО: {props.data.name} </div>
                     <div className='soma-person-data-dc'> Тип досье: {props.data.position} </div>
                 </Grid>
@@ -276,7 +350,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function NewDossierDialog() {
+const NewDossierDialog = () => {
     const [open, setOpen] = React.useState(false);
   
     const handleClickOpen = () => {
@@ -352,8 +426,10 @@ function NewDossierDialog() {
     );
 }
 
-function EditDossierDialog() {
+const EditDossierDialog = (props) => {
     const [open, setOpen] = React.useState(false);
+    const [name, setName] = React.useState(props.data.name);
+    const [dossier, setDossier] = React.useState(props.data.position);
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -363,8 +439,19 @@ function EditDossierDialog() {
       setOpen(false);
     };
   
+    const handleSave = () => {
+        PersonsAPI.editPerson({
+            id: props.data.id,
+            name: name,
+            position: dossier
+        }, props.token).then(res => {
+            props.updateCallback()
+        })
+        setOpen(false);
+    }
+
     return (
-      <div>
+      <>
         <Button 
             onClick={handleClickOpen}
             variant="contained"
@@ -383,28 +470,25 @@ function EditDossierDialog() {
             maxWidth={'sm'}>
           <DialogTitle id="form-dialog-title">Изменить досье</DialogTitle>
           <DialogContent>
-            {/* <DialogContentText>
-              text
-            </DialogContentText> */}
             <TextField
               autoFocus
-            //   margin="dense"
               id="name"
               label="ФИО"
-            //   type="email"
               fullWidth
-            />
+              value={name}
+              onChange={e => setName(e.target.value)}
+              />
              <TextField
               autoFocus
-            //   margin="dense"
               id="dossier"
               label="Тип досье"
-            //   type="email"
               fullWidth
-            />
+              value={dossier}
+              onChange={e => setDossier(e.target.value)}
+              />
             <br />
             <br />
-            <Button
+            {/* <Button
             variant="contained"
             component="label"
             >
@@ -413,18 +497,18 @@ function EditDossierDialog() {
                     type="file"
                     hidden
                 />
-            </Button>
+            </Button> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Отменить
             </Button>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={handleSave} color="primary">
               Сохранить
             </Button>
           </DialogActions>
         </Dialog>
-      </div>
+      </>
     );
 }
 

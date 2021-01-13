@@ -19,6 +19,12 @@ body:before {
     z-index: -1;
 }
 
+.p13-alert  {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+}
+
 .soma-person-block {
     display: flex;
     flex-direction: row;

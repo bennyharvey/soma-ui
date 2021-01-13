@@ -21,9 +21,8 @@ const CamDashboard = () => {
             <div className="cam-dashboard-box" key={12}>
                 <Paper elevation={5} className={dynamicPaper}>
                     <ReactPlayer 
-                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_21/s.m3u8'
+                        url='http://domofon-stream.tattelecom.ru/EC0pqZxsfDF5DfHdSXfm2z0PthuAVU/hls/admin/intercom_11/s.m3u8'
                         playing={true}
-                        
                     />
                 </Paper>
             </div>,
@@ -131,12 +130,7 @@ const CamDashboard = () => {
                     </Paper>
                 </Grid>
             </Grid> */}
-            <Box pt={4}>
-                <ReactPlayer 
-                    url='http://vlc:vlcrtsp2016@sstrm-mslm1.tattelecom.ru/live/media/AXXON-MSLM120/DeviceIpint.188/SourceEndpoint.video:0:1?format=mp4'
-                    playing={true} 
-                />
-            </Box>
+         
         </div>
     );
 };

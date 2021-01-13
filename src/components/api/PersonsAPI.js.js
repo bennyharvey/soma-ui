@@ -13,6 +13,28 @@ export const get = (page = 1, perPage = 10) => {
     })
 }
 
+export const editPerson = (data, token) => {
+    return fetch(config.PERSONS_URL + '?token=' + token, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+}
+
+
+export const addPersonPhoto = (personID, data, token) => {
+    return fetch(`${config.PERSONS_URL}/${personID}/faces?token=${token}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: data
+    })
+}
+
+
 export const getPhotoIDs = (personID, token) => {
     // const { token } = useContext(AuthContext);
 

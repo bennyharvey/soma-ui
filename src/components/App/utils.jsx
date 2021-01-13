@@ -27,3 +27,24 @@ export function reindexArray (array, idField) {
     return obj;
 };
 
+export function getDateForPicker(date = '') {
+    let d;
+    if (date == ''){
+        d = new Date();
+    } else {
+        d = new Date(date);
+    }
+    return d.getFullYear() + '-' 
+        + appendLeadingZero(d.getMonth()) + '-' 
+        + appendLeadingZero(d.getDay()) + 'T'
+        + appendLeadingZero(d.getHours()) + ':'
+        + appendLeadingZero(d.getMinutes())
+}
+
+function appendLeadingZero(num) {
+    if (num < 10) {
+        return '0' + num
+    } else {
+        return num
+    }
+}
