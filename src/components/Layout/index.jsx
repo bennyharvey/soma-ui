@@ -145,6 +145,10 @@ export const makeCommonClasses = makeStyles(theme => ({
         marginTop: "10%",
         // backgroundColor: "#00000030",
     },
+    personPhotoDeleteButton : {
+        marginLeft: "-78px",
+        marginTop: "-59px"
+    }
 }))
 
 let darkState = true

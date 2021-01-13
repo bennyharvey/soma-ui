@@ -29,7 +29,6 @@ const Login = () => {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
             },
             mode: 'cors',
             cache: 'default',
@@ -37,27 +36,21 @@ const Login = () => {
         .then(res => res.json())
         .then(
             (result) => {
-                // log('login attempt')
                 log(result)
                 setToken(result.token)
-                let date = new Date()
-                date = date.setDate(date.getDate() + 1);
-                cookies.set('token', result.token, { path: '/', Expires: date });
-                
-                // SetUserAuthorisation(true)
+                cookies.set('token', result.token, { path: '/', maxAge: 3600  });
             },
             (error) => {
                 log(error)
             }
         )
     }
+
     return (
         <div>
         <Card className={classes.loginCard}>
             <CardContent>
                 <form className={classes.loginForm} noValidate autoComplete="off">
-                    {/* <TextField id="standard-basic" label="Standard" /> */}
-                    {/* <TextField id="filled-basic" label="Filled" variant="filled" /> */}
                     <TextField id="login" 
                         fullWidth 
                         label="Имя пользователя" 
@@ -77,11 +70,8 @@ const Login = () => {
                 <Button onClick={handleLogin} variant="contained" fullWidth color="primary" type="submit">Войти</Button>
             </CardContent>
         </Card>
-        
-        
         </div>
-        );
-    }
+    );
+}
     
-    
-    export default Login;
+export default Login;

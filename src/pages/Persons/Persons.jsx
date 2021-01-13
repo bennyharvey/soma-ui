@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import {AuthContext} from '../../components/App/auth'
 
+import * as PersonsAPI from '../../components/api/PersonsAPI.js'
+
 import clsx from "clsx";
 import Pagination from '@material-ui/lab/Pagination';
 import PaginationItem from '@material-ui/lab/PaginationItem';
@@ -25,6 +27,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 // import Chart from "./Chart";
 // import UserCard from "./UserCard";
 // import Submissions from "./Submissions";
@@ -39,15 +44,12 @@ const Persons = (props) => {
             <Route exact path={path}>
                 <div><API page={props.page} personPage={false}/></div>
             </Route>
-            <Route path={`${path}/:id`}>
+            <Route path={`${path}/:idQueryParam`}>
                 <div><API page={props.page} personPage={true}/></div>
             </Route>
         </Switch>
     );
 }
-
-const BASE_URL = 'https://192.168.114.171'
-const API_URL = BASE_URL + '/api'
 
 const API = (props) => {
     const [error, setError] = useState(null)
@@ -63,21 +65,10 @@ const API = (props) => {
     const { token } = useContext(AuthContext);
     
     const retrieveItems = () => {
-        let queryToken = '&token=' + token
-        let offset = page  == undefined ? '&per-page=10&page=1' : '&per-page=10&page=' + page
 
-        fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        PersonsAPI.get(page, 3)
         .then(res => {
             setPageCount(parseInt(res.headers.get('X-Pagination-Page-Count')))
-            // res.headers.forEach((e) => {
-            //     log(e)
-            // })
-            // log(res.headers.keys().next())
             return res.json()
         })
         .then(
@@ -88,7 +79,7 @@ const API = (props) => {
                 let personFacesBuffer = []
                 let promises = []
                 personsResponce.forEach(person => (
-                    promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
+                    promises.push(PersonsAPI.getPhotoIDs(person.id, token).then((result) => {
                         // log(result)
                         if (result[0] === undefined) {
                             return {
@@ -109,6 +100,7 @@ const API = (props) => {
                 ))
                 Promise.all(promises).then((photos) => {
                     setPersonFaces(personFacesBuffer)
+                    log('faces')
                     log(personFacesBuffer)
                     setPhotos(itemBuffer)
                 })
@@ -123,25 +115,6 @@ const API = (props) => {
         )
     }
 
-    const [personPhotos, setPersonPhotos] = useState([])
-
-    const fetchPersonPhotos = async (person, queryToken) => {
-        // log(person)
-        let url = config.PERSONS_URL + '/' + person.id + '/faces?' + queryToken
-        let requestOptions = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }
-        const response = await fetch(url, requestOptions);
-        const jsonData = await response.json();
-        // log('photo request' + person.id)
-        // setPersonPhotos(jsonData)
-        // log(jsonData)
-        return jsonData
-    }
-
     useEffect(() => {
         setPage(props.page)
     }, [])
@@ -151,8 +124,8 @@ const API = (props) => {
     const classes = layout.makeCommonClasses()
     const dynamicPaper = clsx(classes.paper, classes.blurredBackground, classes.animatedBox, classes.zoomIn, classes.paperHover)
 
-    let { id } = useParams();
-
+    let { idQueryParam } = useParams();
+    
     if (error) {
       return <div>Error: {error.message}</div>
     } else if (!isLoaded) {
@@ -207,15 +180,24 @@ const API = (props) => {
         );
     }
     else {
-        return (<PersonDescription data={itemsArray[id]} personFaces={personFaces} token={token}/>)
+        return (<PersonDescription data={itemsArray[idQueryParam]} personFaces={personFaces} token={token} updateCallback={retrieveItems}/>)
     }
 }
 
 
 const PersonDescription = (props) => {
-    let { id } = useParams();
-    // log(props)
     let history = useHistory();
+    const classes = layout.makeCommonClasses()
+    const { token } = useContext(AuthContext);
+    const handlePhotoDelete = (id) => {
+        PersonsAPI.deletePhoto(id, token).then(res => {
+            if (res.status == 200) {
+                props.updateCallback()
+                history.push("/persons")
+            }
+        })
+    }
+
     return (
         <div className='soma-person-desc'>
             <h1>Досье №{props.data.id}</h1>
@@ -223,7 +205,10 @@ const PersonDescription = (props) => {
                 variant="contained"
                 color="primary"
                 size="large"
-                onClick={() => {history.goBack()}}
+                onClick={() => { 
+                    props.updateCallback()
+                    history.goBack()
+                }}
             >
                 {'< Назад'}
             </Button>
@@ -232,7 +217,10 @@ const PersonDescription = (props) => {
                 color="primary"
                 size="large"
                 disabled={true}
-                onClick={() => {history.goBack()}}
+                onClick={() => {
+                    props.updateCallback()
+                    history.goBack()
+                }}
             >
                 {'Изменить'}
             </Button>
@@ -244,6 +232,12 @@ const PersonDescription = (props) => {
                         {props.personFaces[props.data.id].map(perconFace => (
                             <div className='soma-person-desc-image' key={perconFace.id}> 
                                 <img src={config.PHOTOS_URL + '/' + perconFace.photo_id + '?token=' +props.token} />
+                                <IconButton aria-label="delete" className={classes.personPhotoDeleteButton}
+                                    onClick={() => {handlePhotoDelete(perconFace.id)}}
+                                >
+                                    <DeleteIcon fontSize="large" />
+                                </IconButton>
+                               
                             </div>
                         ))}
                     </div>

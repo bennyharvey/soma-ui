@@ -15,7 +15,7 @@ export default function App() {
 
     useEffect(() => {
         const cookies = new Cookies();
-        const tokenLookup = cookies.get('token')
+        let tokenLookup = cookies.get('token')
         if (tokenLookup !== undefined){
             setToken(tokenLookup)
         }
