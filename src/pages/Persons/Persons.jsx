@@ -16,23 +16,19 @@ import {
 } from "@material-ui/core";
 
 import * as config from '../../components/App/config'
-import { log , reindexArray} from '../../components/App/config'
+import { log, reindexArray } from '../../components/App/utils'
+
 import * as layout from '../../components/Layout'
 
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
 import Slide from '@material-ui/core/Slide';
 
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-// import Chart from "./Chart";
-// import UserCard from "./UserCard";
-// import Submissions from "./Submissions";
 
 import { Switch, Route, Link as RouterLink, useParams, useRouteMatch, useHistory } from "react-router-dom";
 
@@ -73,6 +69,7 @@ const API = (props) => {
         })
         .then(
             (personsResponce) => {
+                
                 log(personsResponce)
                 setIsLoaded(true)
                 let itemBuffer = []
@@ -197,7 +194,8 @@ const PersonDescription = (props) => {
             }
         })
     }
-
+    log('desc')
+    log(props)
     return (
         <div className='soma-person-desc'>
             <h1>Досье №{props.data.id}</h1>
@@ -212,19 +210,6 @@ const PersonDescription = (props) => {
             >
                 {'< Назад'}
             </Button>
-            <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                disabled={true}
-                onClick={() => {
-                    props.updateCallback()
-                    history.goBack()
-                }}
-            >
-                {'Изменить'}
-            </Button>
-            <br />
             <Grid container spacing={3}>
                 <Grid item xs={6}>
                     <div className='soma-person-desc-image_block'> 
@@ -243,6 +228,7 @@ const PersonDescription = (props) => {
                     </div>
                 </Grid>
                 <Grid item xs={6}>
+                    <EditDossierDialog data={props.data}/> <br />
                     <div className='soma-person-data-desc-text'> ФИО: {props.data.name} </div>
                     <div className='soma-person-data-dc'> Тип досье: {props.data.position} </div>
                 </Grid>
@@ -364,6 +350,82 @@ function NewDossierDialog() {
         </Dialog>
       </div>
     );
-  }
+}
+
+function EditDossierDialog() {
+    const [open, setOpen] = React.useState(false);
+  
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+  
+    return (
+      <div>
+        <Button 
+            onClick={handleClickOpen}
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={false}>
+          Изменить
+        </Button>
+        <Dialog 
+            open={open} 
+            onClose={handleClose} 
+            aria-labelledby="form-dialog-title"
+            TransitionComponent={Transition}
+            keepMounted
+            fullWidth={true}
+            maxWidth={'sm'}>
+          <DialogTitle id="form-dialog-title">Изменить досье</DialogTitle>
+          <DialogContent>
+            {/* <DialogContentText>
+              text
+            </DialogContentText> */}
+            <TextField
+              autoFocus
+            //   margin="dense"
+              id="name"
+              label="ФИО"
+            //   type="email"
+              fullWidth
+            />
+             <TextField
+              autoFocus
+            //   margin="dense"
+              id="dossier"
+              label="Тип досье"
+            //   type="email"
+              fullWidth
+            />
+            <br />
+            <br />
+            <Button
+            variant="contained"
+            component="label"
+            >
+                Добавить фото
+                <input
+                    type="file"
+                    hidden
+                />
+            </Button>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Отменить
+            </Button>
+            <Button onClick={handleClose} color="primary">
+              Сохранить
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+}
 
 export default Persons

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext }  from "react"
+import * as config from '../../components/App/config'
+
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-// import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom";
 import {makeCommonClasses} from '../../components/Layout'
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import * as config from '../../components/App/config'
-import {log} from '../../components/App/config'
+import {log} from '../../components/App/utils'
 import {AuthContext} from '../../components/App/auth'
 import Cookies from 'universal-cookie';
 

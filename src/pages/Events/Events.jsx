@@ -13,7 +13,7 @@ import Pagination from '@material-ui/lab/Pagination'
 import PaginationItem from '@material-ui/lab/PaginationItem'
 
 import * as config from '../../components/App/config'
-import {log, getDateForPicker} from '../../components/App/config'
+import {log, getDateForPicker} from '../../components/App/utils'
 import BeenhereIcon from '@material-ui/icons/Beenhere';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';

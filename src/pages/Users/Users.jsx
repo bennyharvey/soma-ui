@@ -14,7 +14,7 @@ import {
 } from "@material-ui/core";
 
 import * as config from '../../components/App/config'
-import { log , reindexArray} from '../../components/App/config'
+import { log , reindexArray} from '../../components/App/utils'
 import * as layout from '../../components/Layout'
 
 import TextField from '@material-ui/core/TextField';

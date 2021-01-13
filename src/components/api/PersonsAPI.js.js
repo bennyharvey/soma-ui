@@ -5,7 +5,6 @@ import * as config from '../App/config'
 
 
 export const get = (page = 1, perPage = 10) => {
-
     return fetch(config.NEW_PERSONS_URL + '?per-page=' + perPage + '&page=' + page, {
         method: 'GET',
         headers: {
