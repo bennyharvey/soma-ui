@@ -1,43 +1,45 @@
 import React, { useState, useEffect, useContext } from "react";
-import {AuthContext} from '../../components/App/auth'
-
-import * as PersonsAPI from '../../components/api/PersonsAPI.js'
+import { Switch, Route, Link as RouterLink, useParams, useRouteMatch, useHistory } from "react-router-dom";
 
 import clsx from "clsx";
 import Pagination from '@material-ui/lab/Pagination';
 import PaginationItem from '@material-ui/lab/PaginationItem';
-import Chip from '@material-ui/core/Chip';
-import FaceIcon from '@material-ui/icons/Face';
-import DoneIcon from '@material-ui/icons/Done';
 import {
     Grid,
     Paper,
     Button
 } from "@material-ui/core";
-
-import * as config from '../../components/App/config'
-import { log, reindexArray } from '../../components/App/utils'
-
-import * as layout from '../../components/Layout'
-
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import Slide from '@material-ui/core/Slide';
-
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-import { Switch, Route, Link as RouterLink, useParams, useRouteMatch, useHistory } from "react-router-dom";
-
 import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
 
+
+import {AuthContext} from '../../components/App/auth'
+import * as PersonsAPI from '../../components/api/PersonsAPI.js'
+import * as config from '../../components/App/config'
+import { log, reindexArray } from '../../components/App/utils'
+import * as layout from '../../components/Layout'
+// import { logger } from '../../components/Utils/Logger'
+import { unboundLogger } from '../../components/Utils/Logger'
+
+const ulog = unboundLogger
+
 const Persons = (props) => {
     let { path, url } = useRouteMatch();
-
+    // logger.info('fancy')
+    // logger.bind('fuck')
+    ulog.finger()
+    ulog.hey()
+    ulog.taco()
+    ulog.info('\\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/')
+    ulog.info('Me and the lads on our way to die for Israel' )
     return (
         <Switch>
             <Route exact path={path}>
@@ -65,14 +67,12 @@ const API = (props) => {
     
     const retrieveItems = () => {
 
-        PersonsAPI.get(page, 3)
+        PersonsAPI.get({page: page, perPage: 3})
         .then(res => {
             setPageCount(parseInt(res.headers.get('X-Pagination-Page-Count')))
             return res.json()
         })
-        .then(
-            (personsResponce) => {
-                
+        .then(personsResponce => {
                 log(personsResponce)
                 setIsLoaded(true)
                 let itemBuffer = []
@@ -456,8 +456,7 @@ const EditDossierDialog = (props) => {
             onClick={handleClickOpen}
             variant="contained"
             color="primary"
-            size="large"
-            disabled={false}>
+            size="large">
           Изменить
         </Button>
         <Dialog 

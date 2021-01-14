@@ -4,7 +4,7 @@ import * as config from '../App/config'
 // import {AuthContext} from '../../components/App/auth'
 
 
-export const get = (page = 1, perPage = 10) => {
+export const get = ({page = 1, perPage = 10}) => {
     return fetch(config.NEW_PERSONS_URL + '?per-page=' + perPage + '&page=' + page, {
         method: 'GET',
         headers: {
