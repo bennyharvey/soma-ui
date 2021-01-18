@@ -16,6 +16,7 @@ import {
 import * as config from '../../components/App/config'
 import { log , reindexArray} from '../../components/App/utils'
 import * as layout from '../../components/Layout'
+import * as UsersAPI from '../../components/api/UsersAPI.js'
 
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -189,7 +190,7 @@ const API = (props) => {
                 }}
             </Route>
             <br />
-            <NewUserDialog />
+            <NewUserDialog updateCallback={retrieveItems} token={token}/>
             <br />
             <br />
             {items.map(item => (
@@ -261,17 +262,17 @@ const PersonBlock = (props) => {
     )
 }
 
-const PersonImage = (props) => {
-    let photoID = props.photos[props.id]
-    // log(props);
-    // log(photoID);
-    return (
-        <div className='soma-person-image'> 
-            <img src={config.PHOTOS_URL + '/' + photoID + '?token=' +props.token} />
-        </div>
-    )
+// const PersonImage = (props) => {
+//     let photoID = props.photos[props.id]
+//     // log(props);
+//     // log(photoID);
+//     return (
+//         <div className='soma-person-image'> 
+//             <img src={config.PHOTOS_URL + '/' + photoID + '?token=' +props.token} />
+//         </div>
+//     )
     
-}
+// }
 
 const PersonData = (props) => {
     return (
@@ -289,9 +290,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function NewUserDialog() {
+
+
+function NewUserDialog(props) {
     const [open, setOpen] = React.useState(false);
-  
+    const [login, setLogin] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [passwordRepeat, setPasswordRepeat] = React.useState('');
+    const [passwordRepeatText, setPasswordRepeatText] = React.useState('Повторите пароль');
+
     const handleClickOpen = () => {
       setOpen(true);
     };
@@ -300,6 +307,27 @@ function NewUserDialog() {
       setOpen(false);
     };
   
+    const handleSave = () => {
+        if (passwordRepeat !== password) {
+            alert('Пароли не совпадают')
+            return
+        }
+
+        if (password.length < 16) {
+            alert('Длина пароля должна быть не менее 16 символов')
+            return
+        }
+
+        UsersAPI.addUser({
+            login: login,
+            password: password,
+            role: "admin"
+        }, props.token).then(res => {
+            props.updateCallback()
+            setOpen(false);
+        })
+    }
+
     return (
       <div>
         <Button 
@@ -320,46 +348,43 @@ function NewUserDialog() {
             maxWidth={'sm'}>
           <DialogTitle id="form-dialog-title">Новый пользователь</DialogTitle>
           <DialogContent>
-            {/* <DialogContentText>
-              text
-            </DialogContentText> */}
             <TextField
               autoFocus
-            //   margin="dense"
               id="name"
               label="Логин"
-            //   type="email"
               fullWidth
+              onChange={e => setLogin(e.target.value)}
             />
-             <TextField
+            <TextField
               autoFocus
-            //   margin="dense"
-              id="dossier"
+              id="password"
               label="Пароль"
-              type="password"
+              color="warning"
               fullWidth
+              onChange={e => setPassword(e.target.value)}
             />
-             <TextField
+            <TextField
               autoFocus
-            //   margin="dense"
-              id="dossier"
-              label="Повторите пароль"
-              type="password"
+              id="passwordRepeat"
+              label={passwordRepeatText}
               fullWidth
+              onChange={e => setPasswordRepeat(e.target.value)}
             />
+            <br />
+            <br />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Отменить
             </Button>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={handleSave} color="primary">
               Сохранить
             </Button>
           </DialogActions>
         </Dialog>
       </div>
     );
-  }
+}
 
 
 export default Users

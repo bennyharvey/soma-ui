@@ -48,3 +48,13 @@ function appendLeadingZero(num) {
         return num
     }
 }
+
+export const basicRequest = ({url, method = 'GET', body}) => {
+    return fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: body
+    })
+}

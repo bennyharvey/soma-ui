@@ -23,6 +23,7 @@ import Collapse from '@material-ui/core/Collapse';
 
 import {AuthContext} from '../../components/App/auth'
 import * as PersonsAPI from '../../components/api/PersonsAPI.js'
+
 import * as config from '../../components/App/config'
 import { log, reindexArray } from '../../components/App/utils'
 import * as layout from '../../components/Layout'
@@ -35,11 +36,6 @@ const Persons = (props) => {
     let { path, url } = useRouteMatch();
     // logger.info('fancy')
     // logger.bind('fuck')
-    ulog.finger()
-    ulog.hey()
-    ulog.taco()
-    ulog.info('\\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/')
-    ulog.info('Me and the lads on our way to die for Israel' )
     return (
         <Switch>
             <Route exact path={path}>
@@ -159,7 +155,7 @@ const API = (props) => {
                 }}
             </Route>
             <br />
-            <NewDossierDialog />
+            <NewDossierDialog token={token} updateCallback={retrieveItems}/>
             <br />
             <br />
             {items.map(item => (
@@ -252,11 +248,11 @@ const PersonDescription = (props) => {
         props.updateCallback()
     }
 
-    let faces = props.personFaces[props.data.id]
+    let faces = props.personFaces[props.data?.id] !== undefined ? props.personFaces[props.data?.id] : [];
     
     return (
         <div className='soma-person-desc'>
-            <h1>Досье №{props.data.id}</h1>
+            <h1>Досье №{props.data?.id}</h1>
           
             <Button
                 variant="contained"
@@ -303,8 +299,8 @@ const PersonDescription = (props) => {
                 </Grid>
                 <Grid item xs={6}>
                     <EditDossierDialog data={props.data} token={token} updateCallback={handlePersonEdit}/> <br />
-                    <div className='soma-person-data-desc-text'> ФИО: {props.data.name} </div>
-                    <div className='soma-person-data-dc'> Тип досье: {props.data.position} </div>
+                    <div className='soma-person-data-desc-text'> ФИО: {props.data?.name} </div>
+                    <div className='soma-person-data-dc'> Тип досье: {props.data?.position} </div>
                 </Grid>
             </Grid>
            
@@ -350,9 +346,11 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const NewDossierDialog = () => {
+const NewDossierDialog = (props) => {
     const [open, setOpen] = React.useState(false);
-  
+    const [name, setName] = React.useState('');
+    const [dossier, setDossier] = React.useState('');
+
     const handleClickOpen = () => {
       setOpen(true);
     };
@@ -361,6 +359,16 @@ const NewDossierDialog = () => {
       setOpen(false);
     };
   
+    const handleSave = () => {
+        PersonsAPI.addPerson({
+            name: name,
+            position: dossier
+        }, props.token).then(res => {
+            props.updateCallback()
+        })
+        setOpen(false);
+    }
+
     return (
       <div>
         <Button 
@@ -370,6 +378,14 @@ const NewDossierDialog = () => {
             size="large"
             disabled={false}>
           Добавить досье
+        </Button>
+        <Button 
+            // onClick={handleClickOpen}
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={false}>
+          Импортировать из директории
         </Button>
         <Dialog 
             open={open} 
@@ -381,43 +397,28 @@ const NewDossierDialog = () => {
             maxWidth={'sm'}>
           <DialogTitle id="form-dialog-title">Новое досье</DialogTitle>
           <DialogContent>
-            {/* <DialogContentText>
-              text
-            </DialogContentText> */}
             <TextField
               autoFocus
-            //   margin="dense"
               id="name"
               label="ФИО"
-            //   type="email"
               fullWidth
+              onChange={e => setName(e.target.value)}
             />
              <TextField
               autoFocus
-            //   margin="dense"
               id="dossier"
               label="Тип досье"
-            //   type="email"
               fullWidth
+              onChange={e => setDossier(e.target.value)}
             />
             <br />
             <br />
-            <Button
-            variant="contained"
-            component="label"
-            >
-                Добавить фото
-                <input
-                    type="file"
-                    hidden
-                />
-            </Button>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Отменить
             </Button>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={handleSave} color="primary">
               Сохранить
             </Button>
           </DialogActions>
@@ -428,8 +429,8 @@ const NewDossierDialog = () => {
 
 const EditDossierDialog = (props) => {
     const [open, setOpen] = React.useState(false);
-    const [name, setName] = React.useState(props.data.name);
-    const [dossier, setDossier] = React.useState(props.data.position);
+    const [name, setName] = React.useState(props.data?.name);
+    const [dossier, setDossier] = React.useState(props.data?.position);
   
     const handleClickOpen = () => {
       setOpen(true);

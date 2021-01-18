@@ -56,6 +56,7 @@ const Login = () => {
                         label="Имя пользователя" 
                         variant="filled" 
                         value={login} 
+                        autoComplete="username"
                         onChange={e => setLogin(e.target.value)}/>
                     <br />
                     <TextField id="password" 
@@ -64,6 +65,7 @@ const Login = () => {
                         variant="filled" 
                         value={password} 
                         type="password"
+                        autoComplete="current-password"
                         onChange={e => setPassword(e.target.value)}/>
                 </form>
                 <br />

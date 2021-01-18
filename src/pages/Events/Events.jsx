@@ -14,6 +14,10 @@ import PaginationItem from '@material-ui/lab/PaginationItem'
 
 import * as config from '../../components/App/config'
 import {log, getDateForPicker} from '../../components/App/utils'
+import * as EventsAPI from '../../components/api/EventsAPI.js'
+import * as PersonsAPI from '../../components/api/PersonsAPI.js'
+
+
 import BeenhereIcon from '@material-ui/icons/Beenhere';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -31,60 +35,15 @@ import PlayArrow from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 
 
-// const Events = () => {
-//     const classes = layout.makeCommonClasses()
-//     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight, classes.blurredBackground, classes.animatedBox, classes.zoomIn)
-//     const dynamicPaper = clsx(classes.paper, classes.blurredBackground, classes.animatedBox, classes.zoomIn)
-//     // let client = new WebSocket('ws://localhost:19001')
-//     return (
-//         <div>
-//             <Grid container spacing={3}>
-//                 <Grid item xs={12} md={8} lg={9}>
-//                     <Paper elevation={5} className={fixedHeightPaper}>
-//                         <Chart />
-//                     </Paper>
-//                 </Grid>
-//                 <Grid item xs={12} md={4} lg={3}>
-//                     <Paper elevation={5} className={fixedHeightPaper}>
-//                         <UserCard />
-//                     </Paper>
-//                 </Grid>
-//                 <Grid item xs={12}>
-//                     <Paper elevation={5} className={dynamicPaper}>
-//                         <Submissions />
-//                     </Paper>
-//                 </Grid>
-//                 <Grid item xs={12}>
-//                     <Paper elevation={5} className={dynamicPaper}>
-//                         <Submissions />
-//                     </Paper>
-//                 </Grid>
-//             </Grid>
-//             <Box pt={4}>
-//                 <Copyright />
-//             </Box>
-//         </div>
-//     )
-// }
-
-
-
 
 
 
 const Events = (props) => {
-
-
     return (
         <div><API page={props.page}/></div>
     )
 }
 
-// const BASE_URL = 'http://192.168.114.171'
-// const API_URL = BASE_URL + '/api'
-// const LOGIN_URL = API_URL + '/login'
-// const EVENTS_URL = API_URL + '/events'
-// const PHOTOS_URL = API_URL + '/photos'
 const useStyles = makeStyles((theme) => ({
     container: {
       display: 'flex',
@@ -104,67 +63,41 @@ const API = (props) => {
     const [items, setItems] = useState([])
     const [pageCount, setPageCount] = useState(1)
     const [page, setPage] = useState(1)
+    const [filter, setFilter] = useState('')
 
     const classes = layout.makeCommonClasses()
 
     const [photos, setPhotos] = useState([])
 
     const { token } = useContext(AuthContext);
-        
-    // Getting person photos
-    // =================================
+
+    // const [age, setAge] = React.useState('');
+
     const retrievePersonPhotos = () => {
         log('photo fetch')
         let queryToken = '&token=' + token
-        let offset = page  == undefined ? '&limit=5&offset=0' : '&limit=5&offset=' + page * 10
-        // let offset = '&page='
-
-        fetch(config.NEW_PERSONS_URL + '?order_by=time&order_direction=desc' + offset + queryToken, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        PersonsAPI.get({page: 1, perPage: 100})
         .then(res => res.json())
         .then(
             (personsResponce) => {
                 log(personsResponce)
-                // setIsLoaded(true)
                 let itemBuffer = []
                 let promises = []
                 personsResponce.forEach(person => (
                     promises.push(fetchPersonPhotos(person, queryToken).then((result) => {
-                        // log(result)
-                        if (result[0] === undefined) {
-                            return {
-                                id: '',
-                                photo_id: '',
-                            }
-                        }
-                        else {
-                            itemBuffer[person.id] = result[0].photo_id
-                            return {
-                                id: result[0].id ?? '',
-                                photo_id: result[0].photo_id ?? '',
-                            }
-                        }
-
+                        if (result[0] !== undefined) itemBuffer[person.id] = result[0].photo_id
                     }))
                 ))
                 Promise.all(promises).then((photos) => {
-                    log(itemBuffer)
                     setPhotos(itemBuffer)
                 })
-                // setItems(personsResponce)
-                // setPageCount(10)
             },
             (error) => {
                 log(error)
-                // setIsLoaded(true)
-                // setError(error)
             }
         )
     }
+
     const fetchPersonPhotos = async (person, queryToken) => {
         let url = config.PERSONS_URL + '/' + person.id + '/faces?' + queryToken
         let requestOptions = {
@@ -185,104 +118,46 @@ const API = (props) => {
     
 
     const retrieveItems = () => {
-        // setToken(result.token)
-        let queryToken = '&token=' + token
-                
-        // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
-        // let offset = '&limit=10&offset=0'
-        fetchEvents(queryToken)  
-       
-        setIsLoaded(true)
-        setPageCount(10)
+        EventsAPI.gett({page: page, perPage: 10, token: token})
+        .then(res => res.json())
+        .then(res => {
+            setItems(res)
+            log('new fetch')
+            setIsLoaded(true)
+        })
     }
-
-    
-
-    // const [events, setEvents] = useState([])
-
-    const fetchEvents = async (queryToken) => {
-        log('page #: '+ page)
-        let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
-        // let offset = '&limit=10&offset=0'
-
-        // let page = 1
-        // let offset = page  == undefined ? '&limit=10&offset=0' : '&limit=10&offset=' + page * 10
-        let url = config.EVENTS_URL + '?order_by=time&order_direction=desc' + offset + queryToken
-
-        let requestOptions = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }
-        const response = await fetch(url, requestOptions);
-        const jsonData = await response.json();
-        setItems(jsonData)
-        log('new fetch');
-        log(jsonData);
-        log(offset);
-        log(queryToken);
-        // setPersonPhotos(jsonData)
-        // log(jsonData)
-        // return jsonData
-    }
-    
 
     useEffect(() => {
+        setPageCount(10)
         setPage(props.page)
         retrievePersonPhotos()
-
     }, [])
-
-    // setTimeout(() => {
-    //     retrieveItems()
-    //     log('call init')
-    // }, 1000)
 
     useEffect(retrieveItems, [page])
     
 
     const [age, setAge] = React.useState('');
     const handleChange = (event) => {
-      setAge(event.target.value);
+        log(event.target.value)
+        setFilter(event.target.value);
     };
     const BootstrapInput = withStyles((theme) => ({
-        // root: {
-        //   'label + &': {
-        //     marginTop: theme.spacing(3),
-        //   },
-        // },
         input: {
           borderRadius: 4,
           position: 'relative',
-          
-        //   backgroundColor: theme.palette.background.paper,
           fontSize: 16,
           width: '200px',
           border: '1px solid rgba(255, 255, 255, 0.23)',
           padding: '10px 26px 10px 12px',
           color: 'white',
           transition: theme.transitions.create(['border-color', 'box-shadow']),
-          // Use the system font instead of the default Roboto font.
-        //   fontFamily: [
-        //     '-apple-system',
-        //     'BlinkMacSystemFont',
-        //     '"Segoe UI"',
-        //     'Roboto',
-        //     '"Helvetica Neue"',
-        //     'Arial',
-        //     'sans-serif',
-        //     '"Apple Color Emoji"',
-        //     '"Segoe UI Emoji"',
-        //     '"Segoe UI Symbol"',
-        //   ].join(','),
           '&:focus': {
             borderRadius: 4,
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
           },
         },
-      }))(InputBase);
+    }))(InputBase);
 
     const [playButtonIcon, setPlayButtonIcon] = React.useState(<PlayArrow />);
     const [playButtonText, setPlayButtonText] = React.useState('Старт');
@@ -297,10 +172,12 @@ const API = (props) => {
         return (
         <div>
             <Grid container spacing={3}>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={4}>
                     <Route>
                         {({ location }) => {
                             const query = new URLSearchParams(location.search)
+                            const filterQ = query.get('filter')
+                            setFilter(filterQ)
                             const page = parseInt(query.get('page') || '1', 10)
                             setPage(page)
                             // log('pagination update')
@@ -325,7 +202,7 @@ const API = (props) => {
                     </Route>
                     
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={12} sm={2}>
                     <Button
                         variant="contained"
                         color={playButtonColor}
@@ -342,7 +219,7 @@ const API = (props) => {
                                 setPlayButtonColor('default')
                                 setPlayButtonText('Стоп')
                                 let id = setInterval(function() {
-                                    fetchEvents('&token=' + token)  
+                                    retrieveItems()  
                                 }, 500);
                                 setIntervalID(id)
                             }
@@ -353,27 +230,24 @@ const API = (props) => {
                         {playButtonText}
                     </Button>
                 </Grid>
-                <Grid item xs={2}>
-                    <FormControl className={classes.margin}>
-                        <InputLabel id="customized-select-label">Тип события</InputLabel>
+                <Grid item xs={12} sm={2}>
+                    <FormControl className={classes.formControl}>
+                        <InputLabel id="demo-simple-select-label">Тип события</InputLabel>
                         <Select
-                        labelId="customized-select-label"
-                        id="customized-select"
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
                         value={age}
-                        onChange={handleChange}
-                        variant='outlined'
-                        input={<BootstrapInput />}
+                        // onChange={handleChange}
                         >
-
-                        <MenuItem value={10}>Совпадения из списка досье</MenuItem>
-                        <MenuItem value={20}>Распознования лиц</MenuItem>
+                            <MenuItem value={'person_recognize'}>Совпадения из списка досье</MenuItem>
+                            <MenuItem value={'face_recognize'}>Распознования лиц</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={12} sm={2}>
                     <DateAndTimePickers text="От"/>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={12} sm={2}>
                     <DateAndTimePickers text="До"/>
                 </Grid>
             </Grid>
@@ -441,7 +315,7 @@ const PersonImage = (props) => {
 }
 
 const PersonData = (props) => {
-    let t1 = (props.data.time).split('T')
+    let t1 = (props.data.time).split(' ')
     let t2 = t1[1].split('.')
     let date = t2[0]
     let time = t1[0]

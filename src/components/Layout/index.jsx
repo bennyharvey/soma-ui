@@ -148,7 +148,11 @@ export const makeCommonClasses = makeStyles(theme => ({
     personPhotoDeleteButton : {
         marginLeft: "-78px",
         marginTop: "-59px"
-    }
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+      },
 }))
 
 let darkState = true
