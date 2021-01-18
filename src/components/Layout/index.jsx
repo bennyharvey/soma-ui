@@ -150,7 +150,7 @@ export const makeCommonClasses = makeStyles(theme => ({
         marginTop: "-59px"
     },
     formControl: {
-        margin: theme.spacing(1),
+        // margin: theme.spacing(1),
         minWidth: 120,
       },
 }))

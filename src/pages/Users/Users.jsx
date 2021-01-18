@@ -358,6 +358,7 @@ function NewUserDialog(props) {
             <TextField
               autoFocus
               id="password"
+              type="password"
               label="Пароль"
               color="warning"
               fullWidth
@@ -366,6 +367,7 @@ function NewUserDialog(props) {
             <TextField
               autoFocus
               id="passwordRepeat"
+              type="password"
               label={passwordRepeatText}
               fullWidth
               onChange={e => setPasswordRepeat(e.target.value)}

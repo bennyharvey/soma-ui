@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext }  from "react"
+import React, { useState, useEffect, useContext, useRef }  from "react"
 import * as layout from '../../components/Layout'
 import {AuthContext} from '../../components/App/auth'
 
@@ -35,15 +35,6 @@ import PlayArrow from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 
 
-
-
-
-const Events = (props) => {
-    return (
-        <div><API page={props.page}/></div>
-    )
-}
-
 const useStyles = makeStyles((theme) => ({
     container: {
       display: 'flex',
@@ -56,14 +47,28 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
-const API = (props) => {
+function useTraceUpdate(props) {
+    const prev = useRef(props);
+    useEffect(() => {
+      const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+        if (prev.current[k] !== v) {
+          ps[k] = [prev.current[k], v];
+        }
+        return ps;
+      }, {});
+      if (Object.keys(changedProps).length > 0) {
+        console.log('Changed props:', changedProps);
+      }
+      prev.current = props;
+    });
+}
+const Events = (props) => {
+    useTraceUpdate(props);
     const [error, setError] = useState(null)
     const [isLoaded, setIsLoaded] = useState(false)
     const [items, setItems] = useState([])
     const [pageCount, setPageCount] = useState(1)
     const [page, setPage] = useState(1)
-    const [filter, setFilter] = useState('')
 
     const classes = layout.makeCommonClasses()
 
@@ -71,7 +76,25 @@ const API = (props) => {
 
     const { token } = useContext(AuthContext);
 
-    // const [age, setAge] = React.useState('');
+
+    const [filter, setFilter] = useState('')
+    const [filterSelect, setFilterSelect] = useState('')
+
+    const [dateFrom, setDateFrom] = React.useState('');
+    const [dateTo, setDateTo] = React.useState('');
+
+    const handleDateChangeFrom = (e) => {
+        setDateFrom(e.target.value)
+    }
+
+    const handleDateChangeTo = (e) => {
+        setDateTo(e.target.value)
+    }
+
+    const handleFilterChange = (event) => {
+        setFilter(event.target.value)
+        setFilterSelect(event.target.value)
+    };
 
     const retrievePersonPhotos = () => {
         log('photo fetch')
@@ -113,34 +136,26 @@ const API = (props) => {
         return jsonData
     }
 
- 
-
-    
-
     const retrieveItems = () => {
-        EventsAPI.gett({page: page, perPage: 10, token: token})
+        EventsAPI.gett({page: page, perPage: 10, token: token, filterType: filter, dateFrom: dateFrom, dateTo: dateTo})
         .then(res => res.json())
         .then(res => {
             setItems(res)
-            log('new fetch')
+            log('new fetch with ' + filter)
             setIsLoaded(true)
         })
     }
 
+
+    
     useEffect(() => {
         setPageCount(10)
         setPage(props.page)
         retrievePersonPhotos()
     }, [])
 
-    useEffect(retrieveItems, [page])
-    
+    useEffect(retrieveItems, [page, filter, dateFrom, dateTo])
 
-    const [age, setAge] = React.useState('');
-    const handleChange = (event) => {
-        log(event.target.value)
-        setFilter(event.target.value);
-    };
     const BootstrapInput = withStyles((theme) => ({
         input: {
           borderRadius: 4,
@@ -164,6 +179,7 @@ const API = (props) => {
     const [playButtonColor, setPlayButtonColor] = React.useState('primary');
     const [intervalID, setIntervalID] = React.useState(0);
 
+
     if (error) {
       return <div>Error: {error.message}</div>
     } else if (!isLoaded) {
@@ -176,11 +192,11 @@ const API = (props) => {
                     <Route>
                         {({ location }) => {
                             const query = new URLSearchParams(location.search)
-                            const filterQ = query.get('filter')
-                            setFilter(filterQ)
+                            // const filterQ = query.get('filter')
+                            // setFilter(filterQ)
                             const page = parseInt(query.get('page') || '1', 10)
                             setPage(page)
-                            // log('pagination update')
+                            log('pagination update')
                             return (
                                 <Pagination 
                                 count={10} 
@@ -213,14 +229,13 @@ const API = (props) => {
                                 setPlayButtonColor('primary')
                                 setPlayButtonText('Старт')
                                 clearInterval(intervalID)
-                                
                             } else if (playButtonText == 'Старт') {
                                 setPlayButtonIcon(<StopIcon />)
                                 setPlayButtonColor('default')
                                 setPlayButtonText('Стоп')
                                 let id = setInterval(function() {
                                     retrieveItems()  
-                                }, 500);
+                                }, 200);
                                 setIntervalID(id)
                             }
                         }}
@@ -236,19 +251,43 @@ const API = (props) => {
                         <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={age}
-                        // onChange={handleChange}
+                        value={filterSelect}
+                        onChange={handleFilterChange}
                         >
-                            <MenuItem value={'person_recognize'}>Совпадения из списка досье</MenuItem>
-                            <MenuItem value={'face_recognize'}>Распознования лиц</MenuItem>
+                            <MenuItem value={'person_recognize'}>Только совпадения</MenuItem>
+                            <MenuItem value={''}>Все события</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={2}>
-                    <DateAndTimePickers text="От"/>
+                    <form noValidate>
+                        <TextField
+                        id="date-from"
+                        label="От"
+                        type="datetime-local"
+                        defaultValue={getDateForPicker()}
+                        className={classes.textField}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        onChange={handleDateChangeFrom}
+                        />
+                    </form>
                 </Grid>
                 <Grid item xs={12} sm={2}>
-                    <DateAndTimePickers text="До"/>
+                    <form noValidate>
+                        <TextField
+                        id="date-to"
+                        label="До"
+                        type="datetime-local"
+                        defaultValue={getDateForPicker()}
+                        className={classes.textField}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        onChange={handleDateChangeTo}
+                        />
+                    </form>
                 </Grid>
             </Grid>
            
@@ -283,7 +322,7 @@ const PersonBlock = (props) => {
         )
     }
     else if (props.data.type == 'person_recognize') {
-        log(props)
+        // log(props)
         return (
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -398,7 +437,7 @@ function DateAndTimePickers(props) {
     return (
       <form className={classes.container} noValidate>
         <TextField
-          id="datetime-local"
+          id={props.id}
           label={props.text}
           type="datetime-local"
           defaultValue={getDateForPicker()}
@@ -406,6 +445,7 @@ function DateAndTimePickers(props) {
           InputLabelProps={{
                 shrink: true,
           }}
+        //   onChange={onChange}
         />
       </form>
     );
