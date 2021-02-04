@@ -32,6 +32,8 @@ export const makeCommonClasses = makeStyles(theme => ({
     },
     blurredBackground: {
         background: 'url(https://www.akveo.com/blur-admin/assets/img/blur-bg-blurred.jpg) fixed',
+        backgroundSize: "cover",
+        willChange: "transform",
         // filter: 'drop-shadow(6px 2px 6px #020202)',
     },
     paperHover: {
@@ -44,7 +46,8 @@ export const makeCommonClasses = makeStyles(theme => ({
         },
     },
     avatar:{
-        marginRight: '15px'
+        marginRight: '15px',
+
     },
     animatedBox: {
         animationDuration: '.5s',

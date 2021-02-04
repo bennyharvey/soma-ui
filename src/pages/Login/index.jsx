@@ -38,7 +38,7 @@ const Login = () => {
             (result) => {
                 log(result)
                 setToken(result.token)
-                cookies.set('token', result.token, { path: '/', maxAge: 3600 * 24 });
+                cookies.set('token', result.token, { path: '/', maxAge: 3600 * 12 });
             },
             (error) => {
                 log(error)

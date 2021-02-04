@@ -1,23 +1,26 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+
+import { AuthContext } from '../../components/App/auth'
+
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  CssBaseline,
-  Switch,
-  Drawer,
-  Box,
-  AppBar,
-  Toolbar,
-  List,
-  Avatar,
-  Typography,
-  Divider,
-  IconButton,
-  Badge,
-  Container,
-  Grid,
-  Paper,
-  Link
+    CssBaseline,
+    Switch,
+    Drawer,
+    Box,
+    AppBar,
+    Toolbar,
+    List,
+    Avatar,
+    Typography,
+    Divider,
+    IconButton,
+    Badge,
+    Container,
+    Grid,
+    Paper,
+    Link
 } from "@material-ui/core";
 import { typography } from '@material-ui/system';
 import MenuIcon from "@material-ui/icons/Menu";
@@ -37,13 +40,14 @@ import Events from '../../pages/Events'
 import Persons from '../../pages/Persons'
 import Main from '../../pages/Main'
 import Users from '../../pages/Users'
+import Test from '../../pages/Test'
 
 import {
     ListItemIcon,
     ListItem,
     ListItemText,
     ListSubheader
-  } from "@material-ui/core";
+} from "@material-ui/core";
 
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
@@ -65,6 +69,9 @@ import Collapse from '@material-ui/core/Collapse';
 import * as layout from '../Layout'
 import CamDashboard from "../../pages/CamDashboard";
 
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
 const drawerWidth = 240;
 
 
@@ -78,8 +85,9 @@ const useStyles = makeStyles(theme => ({
     blurredBackground: {
         background: 'url(https://www.akveo.com/blur-admin/assets/img/blur-bg-blurred.jpg) fixed'
     },
-    avatar:{
-        marginRight: '15px'
+    avatar: {
+        marginRight: '15px',
+        cursor: "pointer"
     },
     toolbarIcon: {
         display: "flex",
@@ -91,16 +99,16 @@ const useStyles = makeStyles(theme => ({
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
         transition: theme.transitions.create(["width", "margin"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen
         })
     },
     appBarShift: {
         marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
         transition: theme.transitions.create(["width", "margin"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen
         })
     },
     menuButton: {
@@ -126,8 +134,8 @@ const useStyles = makeStyles(theme => ({
         whiteSpace: "nowrap",
         width: drawerWidth,
         transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen
         })
     },
     drawerContainer: {
@@ -136,12 +144,12 @@ const useStyles = makeStyles(theme => ({
     drawerPaperClose: {
         overflowX: "hidden",
         transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen
         }),
         width: theme.spacing(7),
         [theme.breakpoints.up("sm")]: {
-        width: theme.spacing(9)
+            width: theme.spacing(9)
         }
     },
     appBarSpacer: theme.mixins.toolbar,
@@ -165,8 +173,8 @@ const useStyles = makeStyles(theme => ({
     },
     nested: {
         paddingLeft: theme.spacing(4),
-      },
-    nestedWrapper:{
+    },
+    nestedWrapper: {
         backgroundColor: 'rgb(0 0 0 / 30%);'
     }
 }));
@@ -176,24 +184,24 @@ const useStyles = makeStyles(theme => ({
 const draweFixedScrollable = makeStyles(theme => ({
     root: {
         display: 'flex',
-      },
-      appBar: {
+    },
+    appBar: {
         zIndex: theme.zIndex.drawer + 1,
-      },
-      drawer: {
+    },
+    drawer: {
         width: drawerWidth,
         flexShrink: 0,
-      },
-      drawerPaper: {
+    },
+    drawerPaper: {
         width: drawerWidth,
-      },
-      drawerContainer: {
+    },
+    drawerContainer: {
         overflow: 'auto',
-      },
-      content: {
+    },
+    content: {
         flexGrow: 1,
         padding: theme.spacing(3),
-      },
+    },
 }));
 
 
@@ -203,7 +211,7 @@ export default function Dashboard(props) {
     const [open, setOpen] = useState(true);
     const [darkState, setDarkState] = useState(true);
 
-
+    const [anchorEl, setAnchorEl] = React.useState(null);
     const classes = useStyles();
     const handleThemeChange = () => {
         setDarkState(!darkState);
@@ -217,11 +225,25 @@ export default function Dashboard(props) {
     };
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-    const [openCollapse, setOpenCollapse] = React.useState(false);    
+    const [openCollapse, setOpenCollapse] = React.useState(false);
 
-    function handleOpenSettings(){
+    function handleOpenSettings() {
         setOpenCollapse(!openCollapse);
     }
+    const { setToken } = useContext(AuthContext);
+
+    const handleAvatarClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    }
+
+    const handleExit = () => {
+        handleClose()
+        setToken('')
+    };
 
     let location = useLocation()
     let query = new URLSearchParams(location.search)
@@ -230,106 +252,128 @@ export default function Dashboard(props) {
     return (
         <ThemeProvider theme={layout.darkTheme}>
 
-        <div className={classes.root}>
-            <CssBaseline />
-            <AppBar
-            position="absolute"
-            className={clsx(classes.appBar, open && classes.appBarShift)}
-            >
-                <Toolbar className={classes.toolbar} fontFamily="Nerko One">
-                    <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="open drawer"
-                    onClick={open ? handleDrawerClose : handleDrawerOpen}
-                    className={clsx(
-                        classes.menuButton,
-                        // open && classes.menuButtonHidden
-                    )}
-                    >
-                    <MenuIcon />
-                    </IconButton>
-                    <Typography
-                    component="h1"
-                    variant="h6"
-                    color="inherit"
-                    noWrap
-                    className={classes.title}
-                    >
-                    Система распознавания лиц Таттелеком (Тестовая версия)
+            <div className={classes.root}>
+                <CssBaseline />
+                <AppBar
+                    position="absolute"
+                    className={clsx(classes.appBar, open && classes.appBarShift)}
+                >
+                    <Toolbar className={classes.toolbar} fontFamily="Nerko One">
+                        <IconButton
+                            edge="start"
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={open ? handleDrawerClose : handleDrawerOpen}
+                            className={clsx(
+                                classes.menuButton
+                                // open && classes.menuButtonHidden
+                            )}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Typography
+                            component="h1"
+                            variant="h6"
+                            color="inherit"
+                            noWrap
+                            className={classes.title}
+                        >
+                            Система распознавания лиц Таттелеком (Тестовая версия)
                     </Typography>
-                    {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
-                    {/* <IconButton color="inherit" className={classes.appBarIcon}>
+                        {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
+                        {/* <IconButton color="inherit" className={classes.appBarIcon}>
                     <Badge badgeContent={4} color="secondary">
                         <NotificationsIcon />
                     </Badge>
                     </IconButton> */}
-                    <Avatar
-                    className={classes.avatar}
-                    src={avatarImg}
-                    />
-                </Toolbar>  
-            </AppBar>
+                        <Avatar
+                            className={classes.avatar}
+                            src={avatarImg}
+                            onClick={handleAvatarClick}
+                        />
+                    </Toolbar>
+                </AppBar>
 
-            <Drawer
-            variant="permanent"
-            classes={{
-                paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose)
-            }}
-            open={open}
-            >
-                <div className={classes.toolbarIcon}>
-                    <IconButton >
-                    {/* <ChevronLeftIcon /> */}
-                    </IconButton>
-                </div>
-                <Divider />
-                <List>
-                    <ListItem 
-                    component={RouterLink}
-                    to='/users'
-                    button
-                    >
-                        <ListItemIcon>
-                            <AccountBoxIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Пользователи" />
-                    </ListItem>
+                <Menu
+                    id="simple-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem onClick={handleExit}>Выйти</MenuItem>
+                </Menu>
 
-                    <ListItem 
-                    component={RouterLink}
-                    to='/events'
-                    button
-                    >
-                        <ListItemIcon>
-                            <ListIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="События" />
-                    </ListItem>
+                <Drawer
+                    variant="permanent"
+                    classes={{
+                        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose)
+                    }}
+                    open={open}
+                >
+                    <div className={classes.toolbarIcon}>
+                        <IconButton >
+                            {/* <ChevronLeftIcon /> */}
+                        </IconButton>
+                    </div>
+                    <Divider />
+                    <List>
+                        <ListItem
+                            component={RouterLink}
+                            to='/users'
+                            button
+                        >
+                            <ListItemIcon>
+                                <AccountBoxIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Пользователи" />
+                        </ListItem>
 
-                    <ListItem 
-                    component={RouterLink}
-                    to='/persons'
-                    button
-                    >
-                        <ListItemIcon>
-                            <PeopleIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Досье" />
-                    </ListItem>
+                        <ListItem
+                            component={RouterLink}
+                            to='/events'
+                            button
+                        >
+                            <ListItemIcon>
+                                <ListIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="События" />
+                        </ListItem>
 
-                    <ListItem 
+                        <ListItem
+                            component={RouterLink}
+                            to='/persons'
+                            button
+                        >
+                            <ListItemIcon>
+                                <PeopleIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Досье" />
+                        </ListItem>
+
+                        <ListItem
+                            component={RouterLink}
+                            to='/cam-dashboard'
+                            button
+                        >
+                            <ListItemIcon>
+                                <DashboardIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Видеостена" />
+                        </ListItem>
+
+                        {/* <ListItem 
                     component={RouterLink}
-                    to='/cam-dashboard'
+                    to='/test'
                     button
                     >
                         <ListItemIcon>
                             <DashboardIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Видеостена" />
-                    </ListItem>
+                        <ListItemText primary="test" />
+                    </ListItem> */}
 
-                    {/* 
+                        {/* 
                     <ListItem button onClick={handleOpenSettings} disableRipple={false}>
                         <ListItemIcon>
                             <SettingsIcon />
@@ -363,37 +407,40 @@ export default function Dashboard(props) {
                             </ListItem>
                         </List>
                     </Collapse> */}
-                </List>
-                <Divider />
-            </Drawer>
+                    </List>
+                    <Divider />
+                </Drawer>
 
-            <main className={classes.content}>
-                <div className={classes.appBarSpacer} />
-                <Container maxWidth={false} className={classes.container}>
-                    <RouterSwitch>
-                        <Route exact path="/">
-                            <Events />
-                        </Route>
-                        <Route path="/main">
-                            {/* asd */}
-                            <Main />
-                        </Route>
-                        <Route path="/events">
-                            <Events />
-                        </Route>
-                        <Route path="/users">
-                            <Users />
-                        </Route>
-                        <Route path="/cam-dashboard">
-                            <CamDashboard />
-                        </Route>
-                        <Route path="/persons">
-                            <Persons page={pageParam}/>
-                        </Route>
-                    </RouterSwitch>
-                </Container>
-            </main>
-        </div>
+                <main className={classes.content}>
+                    <div className={classes.appBarSpacer} />
+                    <Container maxWidth={false} className={classes.container}>
+                        <RouterSwitch>
+                            <Route exact path="/">
+                                <Events />
+                            </Route>
+                            <Route path="/main">
+                                {/* asd */}
+                                <Main />
+                            </Route>
+                            <Route path="/events">
+                                <Events />
+                            </Route>
+                            <Route path="/users">
+                                <Users />
+                            </Route>
+                            <Route path="/cam-dashboard">
+                                <CamDashboard />
+                            </Route>
+                            <Route path="/persons">
+                                <Persons page={pageParam} />
+                            </Route>
+                            <Route path="/test">
+                                <Test />
+                            </Route>
+                        </RouterSwitch>
+                    </Container>
+                </main>
+            </div>
         </ThemeProvider>
     )
 }

@@ -71,6 +71,7 @@ const API = (props) => {
 
         fetch(config.NEW_USERS_URL + '?fields=login,role' + offset, {
             method: 'GET',
+            // mode:'no-cors',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -360,7 +361,7 @@ function NewUserDialog(props) {
               id="password"
               type="password"
               label="Пароль"
-              color="warning"
+            //   color="warning"
               fullWidth
               onChange={e => setPassword(e.target.value)}
             />

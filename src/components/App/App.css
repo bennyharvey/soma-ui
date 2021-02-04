@@ -66,6 +66,8 @@ body:before {
 .soma-person-data-dc {
     /* margin-left: 10px; */
     font-size: 20px;
+    word-wrap: break-word !important;
+    white-space: pre-wrap;
 }
 .soma-person-data-confirm_button {
     position: absolute !important;

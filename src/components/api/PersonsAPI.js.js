@@ -14,8 +14,14 @@ export const addPerson = (data, token) => basicRequest({
     body: JSON.stringify(data)
 })
 
+export const addPersonNew = (data, token) => basicRequest({
+    url: config.NEW_PERSONS_URL,
+    method: 'POST',
+    body: JSON.stringify(data)
+})
+
 export const editPerson = (data, token) => basicRequest({
-    url: config.PERSONS_URL + '?token=' + token,
+    url: config.NEW_PERSONS_URL + '/' + data.id,
     method: 'PUT',
     body: JSON.stringify(data)
 })

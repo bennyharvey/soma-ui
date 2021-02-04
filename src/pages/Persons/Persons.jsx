@@ -7,7 +7,8 @@ import PaginationItem from '@material-ui/lab/PaginationItem';
 import {
     Grid,
     Paper,
-    Button
+    Button,
+    ButtonGroup
 } from "@material-ui/core";
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -30,7 +31,14 @@ import * as layout from '../../components/Layout'
 // import { logger } from '../../components/Utils/Logger'
 import { unboundLogger } from '../../components/Utils/Logger'
 
+import EditDossierDialog from './EditDialog'
+
+
 const ulog = unboundLogger
+
+
+
+
 
 const Persons = (props) => {
     let { path, url } = useRouteMatch();
@@ -60,10 +68,13 @@ const API = (props) => {
 
     let apiUrl = 'https://reqres.in/api/users?page=' + props.page
     const { token } = useContext(AuthContext);
-    
+
+
+
+
     const retrieveItems = () => {
 
-        PersonsAPI.get({page: page, perPage: 3})
+        PersonsAPI.get({page: page, perPage: 10})
         .then(res => {
             setPageCount(parseInt(res.headers.get('X-Pagination-Page-Count')))
             return res.json()
@@ -253,26 +264,28 @@ const PersonDescription = (props) => {
     return (
         <div className='soma-person-desc'>
             <h1>Досье №{props.data?.id}</h1>
-          
-            <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={() => { 
-                    props.updateCallback()
-                    history.goBack()
-                }}
-            >
-                {'< Назад'}
-            </Button>
-            <TAlert visible={alertVisible} text={alertText} />
-            <Button 
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={handlePhotoUploadButton}>
-                Добавить фото
-            </Button>
+            <ButtonGroup color="primary" aria-label="outlined primary button group">
+
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    onClick={() => { 
+                        props.updateCallback()
+                        history.goBack()
+                    }}
+                >
+                    {'< Назад'}
+                </Button>
+                <TAlert visible={alertVisible} text={alertText} />
+                <Button 
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    onClick={handlePhotoUploadButton}>
+                    Добавить фото
+                </Button>
+            </ButtonGroup>
             <input 
                 type="file" 
                 name="personPhoto" 
@@ -299,8 +312,10 @@ const PersonDescription = (props) => {
                 </Grid>
                 <Grid item xs={6}>
                     <EditDossierDialog data={props.data} token={token} updateCallback={handlePersonEdit}/> <br />
-                    <div className='soma-person-data-desc-text'> ФИО: {props.data?.name} </div>
-                    <div className='soma-person-data-dc'> Тип досье: {props.data?.position} </div>
+                    <div className='soma-person-data-desc-text'>ФИО: {props.data?.name} </div>
+                    <div className='soma-person-data-dc'>Тип досье: {props.data?.position} </div>
+                    <br />
+                    <div className='soma-person-data-dc'>Комментарий: {props.data?.description} </div>
                 </Grid>
             </Grid>
            
@@ -360,33 +375,40 @@ const NewDossierDialog = (props) => {
     };
   
     const handleSave = () => {
-        PersonsAPI.addPerson({
+        PersonsAPI.addPersonNew({
             name: name,
-            position: dossier
+            position: dossier,
+            unit: '-'
         }, props.token).then(res => {
             props.updateCallback()
         })
         setOpen(false);
     }
 
+    const handlePhotoUploadButton = () => {
+        // hiddenFileInput.current.click();
+    }
+
     return (
       <div>
-        <Button 
-            onClick={handleClickOpen}
-            variant="contained"
-            color="primary"
-            size="large"
-            disabled={false}>
-          Добавить досье
-        </Button>
-        <Button 
-            // onClick={handleClickOpen}
-            variant="contained"
-            color="primary"
-            size="large"
-            disabled={false}>
-          Импортировать из директории
-        </Button>
+        <ButtonGroup color="primary" aria-label="outlined primary button group">
+            <Button 
+                onClick={handleClickOpen}
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={false}>
+            Добавить досье
+            </Button>
+            <Button 
+                // onClick={handleClickOpen}
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={false}>
+            Импортировать из директории
+            </Button>
+        </ButtonGroup>
         <Dialog 
             open={open} 
             onClose={handleClose} 
@@ -413,6 +435,20 @@ const NewDossierDialog = (props) => {
             />
             <br />
             <br />
+            {/* <Button 
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handlePhotoUploadButton}>
+                Добавить фото
+            </Button> */}
+            {/* <input 
+                type="file" 
+                name="personPhoto" 
+                onChange={onImageChange}
+                ref={hiddenFileInput}
+                style={{display:'none'}} 
+            /> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
@@ -427,89 +463,5 @@ const NewDossierDialog = (props) => {
     );
 }
 
-const EditDossierDialog = (props) => {
-    const [open, setOpen] = React.useState(false);
-    const [name, setName] = React.useState(props.data?.name);
-    const [dossier, setDossier] = React.useState(props.data?.position);
-  
-    const handleClickOpen = () => {
-      setOpen(true);
-    };
-  
-    const handleClose = () => {
-      setOpen(false);
-    };
-  
-    const handleSave = () => {
-        PersonsAPI.editPerson({
-            id: props.data.id,
-            name: name,
-            position: dossier
-        }, props.token).then(res => {
-            props.updateCallback()
-        })
-        setOpen(false);
-    }
-
-    return (
-      <>
-        <Button 
-            onClick={handleClickOpen}
-            variant="contained"
-            color="primary"
-            size="large">
-          Изменить
-        </Button>
-        <Dialog 
-            open={open} 
-            onClose={handleClose} 
-            aria-labelledby="form-dialog-title"
-            TransitionComponent={Transition}
-            keepMounted
-            fullWidth={true}
-            maxWidth={'sm'}>
-          <DialogTitle id="form-dialog-title">Изменить досье</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              id="name"
-              label="ФИО"
-              fullWidth
-              value={name}
-              onChange={e => setName(e.target.value)}
-              />
-             <TextField
-              autoFocus
-              id="dossier"
-              label="Тип досье"
-              fullWidth
-              value={dossier}
-              onChange={e => setDossier(e.target.value)}
-              />
-            <br />
-            <br />
-            {/* <Button
-            variant="contained"
-            component="label"
-            >
-                Добавить фото
-                <input
-                    type="file"
-                    hidden
-                />
-            </Button> */}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Отменить
-            </Button>
-            <Button onClick={handleSave} color="primary">
-              Сохранить
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
-    );
-}
 
 export default Persons

@@ -28,7 +28,7 @@ export default function App() {
                 <Login />
                 :  
                 <BrowserRouter>
-                    <Dashboard/>
+                    <Dashboard />
                 </BrowserRouter>}
             </AuthContext.Provider>
         </div>
